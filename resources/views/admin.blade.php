@@ -27,8 +27,8 @@
 <link href="{{ mix('admin-css/app.css') }}" rel="stylesheet" />
 <script src="https://ajaxzip3.github.io/ajaxzip3.js" charset="UTF-8"></script>
 <script>
-    let token = '{{Config::get('auth.admin_token')}}'
-    let title = '{{Config::get('app.name')}}'
+    document.params.token = '{{Config::get('auth.admin_token')}}'
+    document.params.itle = '{{Config::get('app.name')}}'
 </script>
 @csrf
 </body>

@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\BaseController;
+use App\Models\EmojiPack;
 use App\Models\Participant;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class ParticipantController extends BaseController
+class EmojiRepoController extends BaseController
 {
 
     /**
@@ -16,18 +17,18 @@ class ParticipantController extends BaseController
      */
     public function getList(): JsonResponse
     {
-        $Participants = Participant::orderByDesc('id')->get();
+        $EmojiPack = EmojiPack::orderByDesc('emoji_pack_id')->get();
 
-        return $this->sendResponse(array_key_camel($Participants->toArray()));
+        return $this->sendResponse(array_key_camel($EmojiPack->toArray()));
     }
 
     /**
      * @param Request $request
      * @return JsonResponse
      */
-    public function addParticipants(Request $request): JsonResponse
+    public function addEmojiPack(Request $request): JsonResponse
     {
-        $Participant = new Participant();
+        $Participant = new EmojiPack();
         $Participant->fill(array_key_snake($request->toArray()));
         if($Participant->save()){
             return $this->sendSuccess();
@@ -40,10 +41,10 @@ class ParticipantController extends BaseController
      * @param $id
      * @return JsonResponse
      */
-    public function showParticipants($token, $id): JsonResponse
+    public function showEmojiPack($id): JsonResponse
     {
 //        dd($request->toArray());
-        return $this->sendResponse(array_key_camel(Participant::findOrFail($id)->toArray()));
+        return $this->sendResponse(array_key_camel(EmojiPack::findOrFail($id)->toArray()));
     }
 
     /**
@@ -52,10 +53,10 @@ class ParticipantController extends BaseController
      * @param $id
      * @return JsonResponse
      */
-    public function editParticipants(Request $request, $token, $id): JsonResponse
+    public function editEmojiPack(Request $request, $id): JsonResponse
     {
 //        dd($request->toArray());
-        $Participant = Participant::findOrFail($id);
+        $Participant = EmojiPack::findOrFail($id);
         $Participant->fill(array_key_snake($request->toArray()));
         if($Participant->save()){
             return $this->sendSuccess();
@@ -68,10 +69,10 @@ class ParticipantController extends BaseController
      * @param $id
      * @return JsonResponse
      */
-    public function setPayed($token, $id): JsonResponse
+    public function setApproved($id): JsonResponse
     {
-        $Participant = Participant::findOrFail($id);
-        $Participant->is_payed = true;
+        $Participant = EmojiPack::findOrFail($id);
+        $Participant->is_approved = true;
         if($Participant->save()){
             return $this->sendSuccess();
         }
@@ -84,9 +85,9 @@ class ParticipantController extends BaseController
      * @return JsonResponse
      * @throws Exception
      */
-    public function deleteParticipants($token, $id): JsonResponse
+    public function deleteEmojiPack($id): JsonResponse
     {
-        $Participant = Participant::findOrFail($id);
+        $Participant = EmojiPack::findOrFail($id);
         if($Participant->delete()){
             return $this->sendSuccess();
         }

@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\BaseController;
-use App\Models\Participant;
+use App\Models\EmojiPack;
 use Auth;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Session;
 
-class ParticipantController extends BaseController
+class EmojiRepoController extends BaseController
 {
 
     /**
@@ -18,7 +18,7 @@ class ParticipantController extends BaseController
      */
     public function getList(): JsonResponse
     {
-        $Participants = Participant::orderByDesc('id')->get();
+        $Participants = EmojiPack::orderByDesc('emoji_pack_id')->get();
 
         return $this->sendResponse(array_key_camel($Participants->toArray()));
     }
@@ -29,7 +29,7 @@ class ParticipantController extends BaseController
     public function getMyInfo(): JsonResponse
     {
         if(!is_null(Session::get('twitterId', null))){
-            $Participants = Participant::whereTwitterId(Session::get('twitterId', null))->firstOrFail();
+            $Participants = EmojiPack::whereTwitterId(Session::get('twitterId', null))->firstOrFail();
 
             return $this->sendResponse(array_key_camel($Participants->toArray()));
         }
@@ -45,7 +45,7 @@ class ParticipantController extends BaseController
     public function showParticipants($token, $id): JsonResponse
     {
 //        dd($request->toArray());
-        return $this->sendResponse(array_key_camel(Participant::findOrFail($id)->toArray()));
+        return $this->sendResponse(array_key_camel(EmojiPack::findOrFail($id)->toArray()));
     }
 
     /**
@@ -56,7 +56,7 @@ class ParticipantController extends BaseController
     public function editMyParticipants(Request $request, $token): JsonResponse
     {
         if(!is_null(Session::get('twitterId', null))){
-            $Participant = Participant::whereTwitterId(Session::get('twitterId', null))->firstOrFail();
+            $Participant = EmojiPack::whereTwitterId(Session::get('twitterId', null))->firstOrFail();
             $params = array_key_snake($request->toArray());
             unset($params['is_payed'], $params['twitter_id'], $params['entry_fee'], $params['join_type'], $params['remarks']);
             $Participant->fill($params);

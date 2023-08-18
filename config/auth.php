@@ -45,6 +45,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'admin-api' => [
+            'driver' => 'session',
+        ],
     ],
 
     /*
@@ -67,7 +71,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Participant::class,
+            'model' => App\Models\EmojiPack::class,
         ],
 
         // 'users' => [
@@ -114,6 +118,8 @@ return [
     'password_timeout' => 10800,
 
     'access_token' => env('ACCESS_TOKEN'),
-    'admin_token' => env('ADMIN_TOKEN'),
+//    'admin_token' => env('ADMIN_TOKEN'),
+    'admin_id' => env('ADMIN_ID'),
+    'admin_password' => env('ADMIN_PASS'),
 
 ];

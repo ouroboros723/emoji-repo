@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class ModifyParticipantsAddColumnComment extends Migration
+class {{ class }} extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,11 @@ class ModifyParticipantsAddColumnComment extends Migration
      */
     public function up()
     {
-        Schema::table('participants', function (Blueprint $table) {
-            $table->text('comment')->comment('ひとこと');
+        Schema::create('{{ table }}', function (Blueprint $table) {
+            $table->id();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
+            $table->dateTime('deleted_at')->nullable();
         });
     }
 
@@ -25,8 +28,6 @@ class ModifyParticipantsAddColumnComment extends Migration
      */
     public function down()
     {
-        Schema::table('participants', function (Blueprint $table) {
-            $table->dropColumn(['comment']);
-        });
+        Schema::dropIfExists('{{ table }}');
     }
 }

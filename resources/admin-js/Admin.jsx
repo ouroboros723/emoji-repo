@@ -244,7 +244,7 @@ class Admin extends Component {
                 <div style={{flexGrow: 1}}>
                     <AppBar position="fixed">
                         <Typography variant="h6" style={{padding: '10px'}}>
-                            天竜浜名湖鉄道 参加者管理
+                            {document.params.title}
                         </Typography>
                     </AppBar>
                 </div>

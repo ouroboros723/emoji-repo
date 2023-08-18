@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
+use Config;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -95,8 +96,12 @@ class LoginController extends Controller
      */
     protected function attemptLogin(Request $request)
     {
-        return $this->guard()->attempt(
-            $this->credentials($request), $request->filled('remember')
-        );
+//        return $this->guard()->attempt(
+//            $this->credentials($request), $request->filled('remember')
+//        );
+
+        $userId = $this->username();
+
+        return $request->$userId === Config::get('auth.admin_id') && $request->password === Config::get('auth.admin_password');
     }
 }
