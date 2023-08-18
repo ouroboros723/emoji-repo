@@ -29,6 +29,10 @@ install-recommend-packages:
 	docker-compose exec app php artisan vendor:publish --provider="Barryvdh\Debugbar\ServiceProvider"
 init:
 	docker-compose up -d --build
+	docker-compose exec app mkdir -p storage/framework/cache/data/
+	docker-compose exec app mkdir -p storage/framework/app/cache
+	docker-compose exec app mkdir -p storage/framework/sessions
+	docker-compose exec app mkdir -p storage/framework/views
 	docker-compose exec app composer install
 	docker-compose exec app chmod 777 -R /work
 	docker-compose exec app cp .env.example .env
