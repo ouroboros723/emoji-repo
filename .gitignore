@@ -1,0 +1,30 @@
+# Laravel
+/node_modules
+/public/hot
+/public/storage
+/public/css
+/public/js
+/public/admin-css
+/public/admin-js
+/public/storage
+/public/mix-manifest.json
+/storage/*.key
+/vendor
+.env
+.env.backup
+.phpunit.result.cache
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/public/css/*
+
+# IDE Settings
+.idea
+.vscode
+.fleet
+
+# プロジェクトの除外パス
+/storage/app/
+/storage/framework/

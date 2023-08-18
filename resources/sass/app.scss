@@ -1,0 +1,28 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+.MuiButton-root {
+    text-transform:none !important;
+}
+
+/*テーブルヘッダの文字を改行させない*/
+#root {
+    .MuiTable-root {
+        .MuiTableCell-head {
+            white-space: nowrap;
+            text-align: center;
+        }
+        .MuiTableCell-root {
+            text-align: center;
+        }
+    }
+    .MuiButton-root {
+        text-transform:none;
+    }
+}
