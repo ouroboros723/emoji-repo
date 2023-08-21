@@ -8,6 +8,7 @@ use Auth;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use JsonException;
 use Session;
 
 class EmojiPackController extends BaseController
@@ -18,53 +19,42 @@ class EmojiPackController extends BaseController
      */
     public function getList(): JsonResponse
     {
-        $Participants = EmojiPack::orderByDesc('emoji_pack_id')->get();
+        $EmojiPack = EmojiPack::orderByDesc('emoji_pack_id')->get();
 
-        return $this->sendResponse(array_key_camel($Participants->toArray()));
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    public function getMyInfo(): JsonResponse
-    {
-        if(!is_null(Session::get('twitterId', null))){
-            $Participants = EmojiPack::whereTwitterId(Session::get('twitterId', null))->firstOrFail();
-
-            return $this->sendResponse(array_key_camel($Participants->toArray()));
-        }
-
-        return $this->sendSuccess('will_not_logged_in_twitter');
-    }
-
-    /**
-     * @param $token
-     * @param $id
-     * @return JsonResponse
-     */
-    public function showParticipants($token, $id): JsonResponse
-    {
-//        dd($request->toArray());
-        return $this->sendResponse(array_key_camel(EmojiPack::findOrFail($id)->toArray()));
+        return $this->sendResponse(array_key_camel($EmojiPack->toArray()));
     }
 
     /**
      * @param Request $request
-     * @param $token
      * @return JsonResponse
+     * @throws JsonException
      */
-    public function editMyParticipants(Request $request, $token): JsonResponse
+    public function addEmojiPack(Request $request): JsonResponse
     {
-        if(!is_null(Session::get('twitterId', null))){
-            $Participant = EmojiPack::whereTwitterId(Session::get('twitterId', null))->firstOrFail();
-            $params = array_key_snake($request->toArray());
-            unset($params['is_payed'], $params['twitter_id'], $params['entry_fee'], $params['join_type'], $params['remarks']);
-            $Participant->fill($params);
-            if($Participant->save()){
-                return $this->sendSuccess('profile_updated');
-            }
+        $emojiPackUrl = file_get_contents($request->emojiPackUrl);
+        try {
+            $emojiPackMetaData = json_decode($emojiPackUrl, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw $e;
         }
 
+        $EmojiPack = new EmojiPack();
+        $EmojiPack->fill(array_key_snake($emojiPackMetaData));
+        $EmojiPack->icon_url = $emojiPackMetaData['iconURL'];
+        $EmojiPack->is_approved = true; // 管理画面からの登録はtrueで固定
+        if($EmojiPack->save()){
+            return $this->sendSuccess();
+        }
         return $this->sendError('failed_save');
+    }
+
+    /**
+     * @param $id
+     * @return JsonResponse
+     */
+    public function showEmojiPackDetail($id): JsonResponse
+    {
+//        dd($request->toArray());
+        return $this->sendResponse(array_key_camel(EmojiPack::findOrFail($id)->toArray()));
     }
 }

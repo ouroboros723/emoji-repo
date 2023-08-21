@@ -6,7 +6,7 @@ import {HashRouter as Router, Route, Switch} from 'react-router-dom';
 // import ErrorBoundary from "../../ErrorBoundary";
 
 // Page Parent Components
-import Participant from "./Participant";
+import EmojiRepo from "./EmojiRepo";
 import Title from "./components/Title";
 
 
@@ -19,7 +19,7 @@ class AppRouter extends Component {
         return (
                 <Router>
                     <Route exact path='/'>
-                        <Title title={'参加者リスト'}><Participant /></Title>
+                        <Title title={this.props.siteTitle}><EmojiRepo siteTitle={this.props.siteTitle}/></Title>
                     </Route>
                 </Router>
             );
