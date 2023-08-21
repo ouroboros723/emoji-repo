@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class EmojiRepoController extends BaseController
+class EmojiPackController extends BaseController
 {
 
     /**
@@ -28,9 +28,18 @@ class EmojiRepoController extends BaseController
      */
     public function addEmojiPack(Request $request): JsonResponse
     {
-        $Participant = new EmojiPack();
-        $Participant->fill(array_key_snake($request->toArray()));
-        if($Participant->save()){
+        $emojiPackUrl = file_get_contents($request->emojiPackUrl);
+        try {
+            $emojiPackMetaData = json_decode($emojiPackUrl, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw $e;
+        }
+
+        $EmojiPack = new EmojiPack();
+        $EmojiPack->fill(array_key_snake($emojiPackMetaData));
+        $EmojiPack->icon_url = $emojiPackMetaData['iconURL'];
+        $EmojiPack->is_approved = true; // 管理画面からの登録はtrueで固定
+        if($EmojiPack->save()){
             return $this->sendSuccess();
         }
         return $this->sendError('failed_save');
@@ -41,7 +50,7 @@ class EmojiRepoController extends BaseController
      * @param $id
      * @return JsonResponse
      */
-    public function showEmojiPack($id): JsonResponse
+    public function showEmojiPackDetail($id): JsonResponse
     {
 //        dd($request->toArray());
         return $this->sendResponse(array_key_camel(EmojiPack::findOrFail($id)->toArray()));

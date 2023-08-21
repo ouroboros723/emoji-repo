@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Session;
 
-class EmojiRepoController extends BaseController
+class EmojiPackController extends BaseController
 {
 
     /**

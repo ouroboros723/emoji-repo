@@ -12,21 +12,22 @@ import {
     TableRow, Typography
 } from "@material-ui/core";
 import axios from "axios";
-import ParticipantManageDialog from "./components/ParticipantManageDialog";
-import NewParticipantDialog from "./components/NewParticipantDialog";
+import EmojiPackManageDialog from "./components/EmojiPackManageDialog";
+import NewEmojiPackDialog from "./components/NewEmojiPackDialog";
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import CommentShow from "../admin-js/components/CommentShow";
+import DownloadIcon from '@mui/icons-material/Download';
 
 class Admin extends Component {
     constructor(props) {
         super(props);
         this.state = {
             data: [],
-            isParticipantDialogOpen: false,
-            isNewParticipantDialogOpen: false,
+            isEmojiPackDialogOpen: false,
+            isNewEmojiPackDialogOpen: false,
             isCommentShowDialogOpen: [],
             isLoaded: false,
-            editParticipant: {
+            editEmojiPack: {
                 participantKind: null,
                 name: '',
                 characterName: '',
@@ -38,16 +39,8 @@ class Admin extends Component {
                 joinType: null,
                 remarks: null,
             },
-            newParticipant: {
-                participantKind: null,
-                name: '',
-                characterName: '',
-                lineName: '',
-                twitterId: '',
-                comment: '',
-                entryFee: null,
-                joinType: null,
-                remarks: null,
+            newEmojiPack: {
+                emojiPackUrl: '',
             }
         }
 
@@ -61,18 +54,18 @@ class Admin extends Component {
             currencyDisplay: 'name',
         });
 
-        this.handleNewParticipantDialogOpen = (open) => {
-            this.setState({isNewParticipantDialogOpen: open});
+        this.handleNewEmojiPackDialogOpen = (open) => {
+            this.setState({isNewEmojiPackDialogOpen: open});
         }
 
-        this.handleParticipantManageDialogOpen = (open, index) => {
+        this.handleEmojiPackManageDialogOpen = (open, index) => {
             console.log('open: ', open);
             if(open === true) {
-                let editParticipant = this.state.data[index];
-                console.log('editParticipant:', editParticipant);
-                this.setState({editParticipant: editParticipant});
+                let editEmojiPack = this.state.data[index];
+                console.log('editEmojiPack:', editEmojiPack);
+                this.setState({editEmojiPack: editEmojiPack});
             } else {
-                let editParticipant = {
+                let editEmojiPack = {
                     participantKind: null,
                     name: '',
                     characterName: '',
@@ -84,9 +77,9 @@ class Admin extends Component {
                     joinType: null,
                     remarks: null,
                 }
-                this.setState({editParticipant: editParticipant});
+                this.setState({editEmojiPack: editEmojiPack});
             }
-            this.setState({isParticipantDialogOpen: open});
+            this.setState({isEmojiPackDialogOpen: open});
         }
 
         this.handleCommentShowDialogOpen = (open, index) => {
@@ -95,21 +88,21 @@ class Admin extends Component {
                 this.setState({isCommentShowDialogOpen: isCommentShowDialogOpen});
         }
 
-        this.newParticipantChangeValue = (e) => {
-            let newParticipant = this.state.newParticipant;
-            newParticipant[e.target.name] = e.target.value;
-            this.setState({newParticipant: newParticipant});
+        this.newEmojiPackChangeValue = (e) => {
+            let newEmojiPack = this.state.newEmojiPack;
+            newEmojiPack[e.target.name] = e.target.value;
+            this.setState({newEmojiPack: newEmojiPack});
         }
 
         this.participantChangeValue = (e) => {
-            let participant = this.state.editParticipant;
+            let participant = this.state.editEmojiPack;
             console.log(participant);
             participant[e.target.name] = e.target.value;
             console.log("parent participant:", participant);
-            this.setState({editParticipant: participant});
+            this.setState({editEmojiPack: participant});
         }
 
-        this.setParticipant = (participant, index) => {
+        this.setEmojiPack = (participant, index) => {
             let temp = this.state.data;
             temp[index] = participant;
             console.log("temp participant:", temp);
@@ -117,17 +110,13 @@ class Admin extends Component {
         }
 
         this.execRegister = () => {
-            axios.post(`/api/admin/participant/add`, this.state.newParticipant)
+            axios.post(`/api/admin/emoji/add`, this.state.newEmojiPack)
                 .then(()=> {
-                    this.getParticipantList();
-                    const newParticipant =  {
-                        participantKind: null,
-                        name: '',
-                        characterName: '',
-                        lineName: '',
-                        twitterId: '',
+                    this.getEmojiPackList();
+                    const newEmojiPack =  {
+                        emojiPackUrl: '',
                     }
-                    this.setState({newParticipant: newParticipant});
+                    this.setState({newEmojiPack: newEmojiPack});
                 })
                 .catch(() => {
                     alert('登録に失敗しました。時間をおいてお試しください。');
@@ -139,49 +128,30 @@ class Admin extends Component {
                 return (
                     <TableRow>
                         <TableCell style={{minWidth: '120px'}}>
+                            <img style={{width: '50px'}} src={value?.iconUrl} />
+                        </TableCell>
+                        <TableCell style={{minWidth: '120px'}}>
                             {value?.name}
                         </TableCell>
-                        <TableCell style={{minWidth: '120px'}}>
-                            {value?.lineName}
-                        </TableCell>
                         <TableCell>
-                            <a href={"https://twitter.com/"+value?.twitterId} target="_blank">{value?.twitterId}</a>
-                        </TableCell>
-                        <TableCell>
-                            {value?.characterName}
-                        </TableCell>
-                        <TableCell style={{minWidth: '120px'}}>
-                            {value?.joinType}
+                            {value?.version}
                         </TableCell>
                         <TableCell>
                             <CommentShow handleOpen={(comment) => {this.handleCommentShowDialogOpen(comment, index)}} open={this.state.isCommentShowDialogOpen[index]} participant={value} />
                         </TableCell>
-                        <TableCell style={{minWidth: '200px'}}>
-                            {value?.remarks}
-                        </TableCell>
-                        <TableCell style={{minWidth: '85px'}}>
-                            {yenFormatter.format(value?.entryFee)}
-                        </TableCell>
                         <TableCell>
-                            {
-                                value.isPayed ?
-                                    <p style={{color: 'green', fontSize: '20px', margin: 0}}>✓</p>
-                                    : <Button variant="contained" color={'primary'} onClick={() => {
-                                        this.setPayed(value.id);
-                                    }}>未</Button>
-
-                            }
+                            <DownloadIcon />
                         </TableCell>
                         <TableCell>
                             <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.handleParticipantManageDialogOpen(true, index)}>
+                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, index)}>
                                     編集
                                 </Button>
                             </div>
                         </TableCell>
                         <TableCell>
                             <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.deleteUser(value.id, value.name)} style={{backgroundColor: '#df0000'}}>
+                                <Button variant={'contained'} color="primary" onClick={() => this.deleteEmojiPack(value.emojiPackId, value.name)} style={{backgroundColor: '#df0000'}}>
                                     <DeleteForeverIcon />
                                 </Button>
                             </div>
@@ -191,8 +161,8 @@ class Admin extends Component {
             });
         }
 
-        this.getParticipantList = () => {
-            axios.get(`/api/admin/participant`)
+        this.getEmojiPackList = () => {
+            axios.get(`/api/admin/emoji`)
                 .then((response) => {
                     this.setState({data: response.data.body});
                     this.setState({isLoaded: true});
@@ -202,9 +172,9 @@ class Admin extends Component {
         this.execUpdate = (id) => {
             if (window.confirm('更新してもよろしいですか？')) {
                 this.setState({isLoaded: false});
-                axios.post(`/api/admin/participant/${id}`, this.state.editParticipant)
+                axios.post(`/api/admin/emoji/${id}`, this.state.editEmojiPack)
                     .then(() => {
-                        this.getParticipantList();
+                        this.getEmojiPackList();
                     });
             }
         }
@@ -212,19 +182,19 @@ class Admin extends Component {
         this.setPayed = (id) => {
             if (window.confirm('支払済みにしますか？')) {
                 this.setState({isLoaded: false});
-                axios.post(`/api/admin/participant/set-payed/${id}`)
+                axios.post(`/api/admin/emoji/set-payed/${id}`)
                     .then(() => {
-                        this.getParticipantList();
+                        this.getEmojiPackList();
                     });
             }
         }
 
-        this.deleteUser = ((id, name) => {
-            if (window.confirm(name + 'さんのデータを削除しますか？')) {
+        this.deleteEmojiPack = ((id, name) => {
+            if (window.confirm('絵文字パック "' + name + '" を削除しますか？')) {
                 this.setState({isLoaded: false});
-                axios.delete(`/api/admin/participant/${id}`)
+                axios.delete(`/api/admin/emoji/${id}`)
                     .then(() => {
-                        this.getParticipantList();
+                        this.getEmojiPackList();
                     });
             }
         });
@@ -232,10 +202,10 @@ class Admin extends Component {
 
     componentDidMount() {
         // setTimeout(() => { // テスト用
-        //     this.getParticipantList();
+        //     this.getEmojiPackList();
         // }, 8000);
         setInterval(() => {
-            this.getParticipantList();
+            this.getEmojiPackList();
         }, 8000);
     }
 
@@ -254,16 +224,12 @@ class Admin extends Component {
                     <Table id={'tableBody'} style={{width: '100%', minHeight: '120px'}}>
                         <TableHead>
                             <TableRow >
-                                <TableCell>参加者名</TableCell>
-                                <TableCell>LINE名</TableCell>
-                                <TableCell>Twitter ID</TableCell>
-                                <TableCell>キャラクター名</TableCell>
-                                <TableCell>参加種別</TableCell>
-                                <TableCell>ひとこと</TableCell>
-                                <TableCell>備考</TableCell>
-                                <TableCell>参加費</TableCell>
-                                <TableCell>支払状況</TableCell>
-                                <TableCell>登録情報編集</TableCell>
+                                <TableCell></TableCell>
+                                <TableCell>絵文字パック名</TableCell>
+                                <TableCell>バージョン</TableCell>
+                                <TableCell>詳細</TableCell>
+                                <TableCell>インストール</TableCell>
+                                <TableCell>編集</TableCell>
                                 <TableCell>削除</TableCell>
                             </TableRow>
                         </TableHead>
@@ -275,10 +241,10 @@ class Admin extends Component {
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <NewParticipantDialog handleOpen={this.handleNewParticipantDialogOpen} open={this.state.isNewParticipantDialogOpen} handleChange={this.newParticipantChangeValue} newParticipant={this.state.newParticipant} execRegister={this.execRegister}/>
+                    <NewEmojiPackDialog handleOpen={this.handleNewEmojiPackDialogOpen} open={this.state.isNewEmojiPackDialogOpen} handleChange={this.newEmojiPackChangeValue} newEmojiPack={this.state.newEmojiPack} execRegister={this.execRegister}/>
                 </div>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <ParticipantManageDialog open={this.state.isParticipantDialogOpen} handleChange={this.participantChangeValue} participant={this.state.editParticipant} execUpdate={this.execUpdate} handleOpen={(open) => this.handleParticipantManageDialogOpen(open, null)} />
+                    <EmojiPackManageDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.participantChangeValue} participant={this.state.editEmojiPack} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} />
                 </div>
             </>
         );

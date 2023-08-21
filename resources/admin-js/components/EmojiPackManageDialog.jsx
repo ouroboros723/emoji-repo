@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -7,9 +7,16 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import PropTypes from "prop-types";
-import {FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@material-ui/core";
+import {Avatar, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@material-ui/core";
 
-export default function NewParticipantDialog(props) {
+export default function EmojiPackManageDialog(props) {
+
+    const yenFormatter = new Intl.NumberFormat('ja-JP', {
+        style: 'currency',
+        currency: 'JPY',
+        currencyDisplay: 'name',
+    });
+
     const handleClickOpen = () => {
         props.handleOpen(true);
     };
@@ -18,26 +25,62 @@ export default function NewParticipantDialog(props) {
         props.handleOpen(false);
     };
 
-    const execRegister = () => {
-        props.execRegister();
+    const handleChangeBool = (e) => {
+        // console.log(e.target.value);
+
+        if(Number(e.target.value) === 1) {
+            let dummyE = {
+                target: {
+                    name: e.target.name,
+                    value: true,
+                }
+            };
+            props.handleChange(dummyE);
+        }
+
+        if(Number(e.target.value) === 0) {
+            let dummyE = {
+                target: {
+                    name: e.target.name,
+                    value: false,
+                }
+            };
+            props.handleChange(dummyE);
+        }
+    }
+
+    // const handleChangeEmojiPack = (e) => {
+    //     let temp = props.emojiPack;
+    //     temp[e.target.name] = e.target.value;
+    //     console.log("parent emojiPack:", temp);
+    //     props.setEmojiPack(temp, temp.id);
+    // };
+
+    const handleChangePayment = (e) => {
+        setPayment(e.target.value);
+    };
+
+    const execUpdate = () => {
+        props.execUpdate(props.emojiPack.id);
         handleClose();
     }
 
+    const [payment, setPayment] = useState(4000);
+
     return (
         <div>
-            <Button variant={'contained'} color="primary" onClick={handleClickOpen}>
-                参加者追加
-            </Button>
             <Dialog open={props.open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">参加者追加</DialogTitle>
+                <DialogTitle id="form-dialog-title">参加者詳細</DialogTitle>
                 <DialogContent>
+                    {/*todo: キャラクタ画像*/}
+                    {/*<Avatar alt="charPhoto" src="/static/images/avatar/1.jpg" style={null} />*/}
                     <TextField
                         margin="dense"
                         label="参加者名"
                         type="text"
                         name="name"
                         onChange={props.handleChange}
-                        value={props.newParticipant?.name}
+                        value={props.emojiPack?.name}
                         fullWidth
                     />
                     <TextField
@@ -46,7 +89,7 @@ export default function NewParticipantDialog(props) {
                         type="text"
                         name="lineName"
                         onChange={props.handleChange}
-                        value={props.newParticipant?.lineName}
+                        value={props.emojiPack?.lineName}
                         fullWidth
                     />
                     <TextField
@@ -55,7 +98,7 @@ export default function NewParticipantDialog(props) {
                         name="characterName"
                         type="text"
                         onChange={props.handleChange}
-                        value={props.newParticipant?.characterName}
+                        value={props.emojiPack?.characterName}
                         fullWidth
                     />
                     <TextField
@@ -64,7 +107,7 @@ export default function NewParticipantDialog(props) {
                         name="twitterId"
                         type="text"
                         onChange={props.handleChange}
-                        value={props.newParticipant?.twitterId}
+                        value={props.emojiPack?.twitterId}
                         fullWidth
                     />
                     <TextField
@@ -73,7 +116,7 @@ export default function NewParticipantDialog(props) {
                         name="joinType"
                         type="text"
                         onChange={props.handleChange}
-                        value={props.newParticipant?.joinType}
+                        value={props.emojiPack?.joinType}
                         fullWidth
                     />
                     <TextField
@@ -82,7 +125,7 @@ export default function NewParticipantDialog(props) {
                         name="comment"
                         type="text"
                         onChange={props.handleChange}
-                        value={props.participant?.comment}
+                        value={props.emojiPack?.comment}
                         fullWidth
                     />
                     <TextField
@@ -91,7 +134,7 @@ export default function NewParticipantDialog(props) {
                         name="remarks"
                         type="text"
                         onChange={props.handleChange}
-                        value={props.participant?.remarks}
+                        value={props.emojiPack?.remarks}
                         fullWidth
                     />
                     <TextField
@@ -100,15 +143,16 @@ export default function NewParticipantDialog(props) {
                         name="entryFee"
                         type="text"
                         onChange={props.handleChange}
-                        value={props.participant?.entryFee}
+                        value={props.emojiPack?.entryFee}
                         fullWidth
                     />
+                    {/*todo: 変更地位に値が書き換わるのを防ぐために、一時変数をvalueに導入*/}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
                         キャンセル
                     </Button>
-                    <Button onClick={execRegister} color="primary">
+                    <Button onClick={execUpdate} color="primary">
                         登録
                     </Button>
                 </DialogActions>
@@ -117,14 +161,16 @@ export default function NewParticipantDialog(props) {
     );
 }
 
-NewParticipantDialog.propTypes = {
+EmojiPackManageDialog.propTypes = {
     open: PropTypes.bool,
     handleOpen: PropTypes.func,
     handleChange: PropTypes.func,
-    execRegister: PropTypes.func,
-    newParticipant: PropTypes.shape({
+    execUpdate: PropTypes.func,
+    emojiPack: PropTypes.shape({
         name: PropTypes.string,
         characterName: PropTypes.string,
         lineName: PropTypes.string,
+        payment: PropTypes.string,
+        isPayed: PropTypes.bool,
     }),
 }
