@@ -19,16 +19,12 @@
 {{--    <link rel="manifest" href="/js/manifest.json"/>--}}
 </head>
 <body>
-<div id="root">
+<div id="root" data-props='{"siteTitle": "{{Config::get('app.name')}}"}'>
     {{--    @include('admin.parts.common.loading-spinner')--}}
 </div>
 <script src="https://cdn.geolonia.com/community-geocoder.js"></script>
 <script src="{{ mix('admin-js/app.js') }}"></script>
 <link href="{{ mix('admin-css/app.css') }}" rel="stylesheet" />
 <script src="https://ajaxzip3.github.io/ajaxzip3.js" charset="UTF-8"></script>
-<script>
-    document.params.token = '{{Config::get('auth.admin_token')}}'
-    document.params.itle = '{{Config::get('app.name')}}'
-</script>
 @csrf
 </body>

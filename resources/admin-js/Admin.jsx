@@ -53,6 +53,8 @@ class Admin extends Component {
 
         this.overlayWidth = '100%';
 
+        this.title = this.props.siteTitle;
+
         const yenFormatter = new Intl.NumberFormat('ja-JP', {
             style: 'currency',
             currency: 'JPY',
@@ -115,7 +117,7 @@ class Admin extends Component {
         }
 
         this.execRegister = () => {
-            axios.post(`/api/admin/${token}/participant/add`, this.state.newParticipant)
+            axios.post(`/api/admin/participant/add`, this.state.newParticipant)
                 .then(()=> {
                     this.getParticipantList();
                     const newParticipant =  {
@@ -190,7 +192,7 @@ class Admin extends Component {
         }
 
         this.getParticipantList = () => {
-            axios.get(`/api/admin/${token}/participant`)
+            axios.get(`/api/admin/participant`)
                 .then((response) => {
                     this.setState({data: response.data.body});
                     this.setState({isLoaded: true});
@@ -200,7 +202,7 @@ class Admin extends Component {
         this.execUpdate = (id) => {
             if (window.confirm('更新してもよろしいですか？')) {
                 this.setState({isLoaded: false});
-                axios.post(`/api/admin/${token}/participant/${id}`, this.state.editParticipant)
+                axios.post(`/api/admin/participant/${id}`, this.state.editParticipant)
                     .then(() => {
                         this.getParticipantList();
                     });
@@ -210,7 +212,7 @@ class Admin extends Component {
         this.setPayed = (id) => {
             if (window.confirm('支払済みにしますか？')) {
                 this.setState({isLoaded: false});
-                axios.post(`/api/admin/${token}/participant/set-payed/${id}`)
+                axios.post(`/api/admin/participant/set-payed/${id}`)
                     .then(() => {
                         this.getParticipantList();
                     });
@@ -220,7 +222,7 @@ class Admin extends Component {
         this.deleteUser = ((id, name) => {
             if (window.confirm(name + 'さんのデータを削除しますか？')) {
                 this.setState({isLoaded: false});
-                axios.delete(`/api/admin/${token}/participant/${id}`)
+                axios.delete(`/api/admin/participant/${id}`)
                     .then(() => {
                         this.getParticipantList();
                     });
@@ -244,7 +246,7 @@ class Admin extends Component {
                 <div style={{flexGrow: 1}}>
                     <AppBar position="fixed">
                         <Typography variant="h6" style={{padding: '10px'}}>
-                            {document.params.title}
+                            {this.props.siteTitle}
                         </Typography>
                     </AppBar>
                 </div>

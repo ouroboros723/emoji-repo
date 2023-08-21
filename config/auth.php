@@ -38,16 +38,12 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'admins',
         ],
 
         'api' => [
             'driver' => 'session',
-            'provider' => 'users',
-        ],
-
-        'admin-api' => [
-            'driver' => 'session',
+            'provider' => 'admins',
         ],
     ],
 
@@ -69,9 +65,9 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'admins' => [
             'driver' => 'eloquent',
-            'model' => App\Models\EmojiPack::class,
+            'model' => App\Models\Admin::class,
         ],
 
         // 'users' => [

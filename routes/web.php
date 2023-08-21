@@ -14,19 +14,35 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// TwitterログインURL
-Route::get('login/twitter', [TwitterController::class, 'redirectToProvider']); //標準ログインにそろえて
-// TwitterコールバックURL
-Route::get('auth/twitter/callback', [TwitterController::class, 'handleProviderCallback']);
-// TwitterログアウトURL
-Route::get('auth/twitter/logout', [TwitterController::class, 'logout']);
+/* 利用者用ルーティング */
+//// TwitterログインURL
+//Route::get('login/twitter', [TwitterController::class, 'redirectToProvider']); //標準ログインにそろえて
+//// TwitterコールバックURL
+//Route::get('auth/twitter/callback', [TwitterController::class, 'handleProviderCallback']);
+//// TwitterログアウトURL
+//Route::get('auth/twitter/logout', [TwitterController::class, 'logout']);
 
-Route::get('/'.Config::get('auth.access_token'), function () {
+Route::get('/', function () {
     return view('index');
 });
 
-Route::get('/admin/'.Config::get('auth.admin_token'), function () {
-    return view('admin');
+/* 管理者用ルーティング */
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Login Routes...
+    Route::get('login', [App\Http\Controllers\Admin\Auth\LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [App\Http\Controllers\Admin\Auth\LoginController::class, 'login']);
+
+//    // Registration Routes...(現在コマンドからのみ登録を許可)
+//    Route::get('register', [App\Http\Controllers\Admin\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+//    Route::post('register', [App\Http\Controllers\Admin\Auth\RegisterController::class, 'register']);
+
+    Route::middleware('auth:api')->group( function () {
+        // Logout Routes...
+        Route::post('logout', [App\Http\Controllers\Admin\Auth\LoginController::class, 'logout'])->name('logout');
+        Route::get('/', function () {
+            return view('admin.index');
+        });
+    });
 });
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+

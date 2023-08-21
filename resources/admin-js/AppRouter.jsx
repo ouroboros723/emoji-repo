@@ -19,7 +19,7 @@ class AppRouter extends Component {
         return (
                 <Router>
                     <Route exact path='/'>
-                        <Title title={'参加者リスト'}><Admin /></Title>
+                        <Title title={this.props.siteTitle}><Admin siteTitle={this.props.siteTitle}/></Title>
                     </Route>
                 </Router>
             );

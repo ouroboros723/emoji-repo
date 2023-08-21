@@ -13,9 +13,3 @@ require('./bootstrap');
  */
 
 require('./components/Example');
-
-import ReactDOM from 'react-dom';
-import AppRouter from "./AppRouter";
-
-// boot React
-ReactDOM.render(<AppRouter/>, document.getElementById('root'));
