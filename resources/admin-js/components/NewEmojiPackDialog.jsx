@@ -35,9 +35,9 @@ export default function NewEmojiPackDialog(props) {
                         margin="dense"
                         label="絵文字パックURL"
                         type="text"
-                        name="emojiPackUrl"
+                        name="sourceUrl"
                         onChange={props.handleChange}
-                        value={props.newEmojiPack?.emojiPackUrl}
+                        value={props.newEmojiPack?.sourceUrl}
                         fullWidth
                     />
                 </DialogContent>
@@ -60,6 +60,6 @@ NewEmojiPackDialog.propTypes = {
     handleChange: PropTypes.func,
     execRegister: PropTypes.func,
     newEmojiPack: PropTypes.shape({
-        emojiPackUrl: PropTypes.string,
+        sourceUrl: PropTypes.string,
     }),
 }

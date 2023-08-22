@@ -22,6 +22,9 @@
 <div id="root" data-props='{"siteTitle": "{{Config::get('app.name')}}"}'>
     {{--    @include('admin.parts.common.loading-spinner')--}}
 </div>
+<form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">
+    @csrf
+</form>
 <script src="https://cdn.geolonia.com/community-geocoder.js"></script>
 <script src="{{ mix('admin-js/app.js') }}"></script>
 <link href="{{ mix('admin-css/app.css') }}" rel="stylesheet" />

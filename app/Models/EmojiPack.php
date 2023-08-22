@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * App\Models\EmojiPack
  *
  * @property int $emoji_pack_id 絵文字パックID
- * @property string $icon_url 絵文字パックURL
+ * @property string $icon_url 絵文字パック アイコンURL
  * @property string $name 絵文字パック名
  * @property string $version 絵文字パックバージョン
  * @property string $description 詳細
@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at 登録日時
  * @property \Illuminate\Support\Carbon|null $updated_at 更新日時
  * @property \Illuminate\Support\Carbon|null $deleted_at 削除日時
+ * @property string $source_url 絵文字パックURL
  * @method static \Illuminate\Database\Eloquent\Builder|EmojiPack newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|EmojiPack newQuery()
  * @method static \Illuminate\Database\Query\Builder|EmojiPack onlyTrashed()
@@ -30,6 +31,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|EmojiPack whereIconUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|EmojiPack whereIsApproved($value)
  * @method static \Illuminate\Database\Eloquent\Builder|EmojiPack whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|EmojiPack whereSourceUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|EmojiPack whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|EmojiPack whereVersion($value)
  * @method static \Illuminate\Database\Query\Builder|EmojiPack withTrashed()
@@ -53,6 +55,7 @@ class EmojiPack extends Model
     protected $casts = [
         'emoji_pack_id' => 'integer',
         'icon_url' => 'string',
+        'source_url' => 'string',
         'name' => 'string',
         'version' => 'string',
         'description' => 'string',

@@ -31,9 +31,9 @@ class EmojiPackController extends BaseController
      */
     public function addEmojiPack(Request $request): JsonResponse
     {
-        $emojiPackUrl = file_get_contents($request->emojiPackUrl);
+        $sourceUrl = file_get_contents($request->sourceUrl);
         try {
-            $emojiPackMetaData = json_decode($emojiPackUrl, true, 512, JSON_THROW_ON_ERROR);
+            $emojiPackMetaData = json_decode($sourceUrl, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             throw $e;
         }

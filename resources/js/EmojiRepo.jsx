@@ -15,6 +15,7 @@ import axios from "axios";
 import CommentShow from "../admin-js/components/CommentShow";
 import DownloadIcon from '@mui/icons-material/Download';
 import EmojiPackShowDialog from "./components/EmojiPackShowDialog";
+import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 
 class EmojiRepo extends Component {
     constructor(props) {
@@ -38,7 +39,7 @@ class EmojiRepo extends Component {
                 remarks: null,
             },
             newEmojiPack: {
-                emojiPackUrl: '',
+                sourceUrl: '',
             }
         }
 
@@ -92,27 +93,27 @@ class EmojiRepo extends Component {
             this.setState({newEmojiPack: newEmojiPack});
         }
 
-        this.participantChangeValue = (e) => {
-            let participant = this.state.editEmojiPack;
-            console.log(participant);
-            participant[e.target.name] = e.target.value;
-            console.log("parent participant:", participant);
-            this.setState({editEmojiPack: participant});
-        }
+        // this.participantChangeValue = (e) => {
+        //     let participant = this.state.editEmojiPack;
+        //     console.log(participant);
+        //     participant[e.target.name] = e.target.value;
+        //     console.log("parent participant:", participant);
+        //     this.setState({editEmojiPack: participant});
+        // }
 
-        this.setEmojiPack = (participant, index) => {
-            let temp = this.state.data;
-            temp[index] = participant;
-            console.log("temp participant:", temp);
-            this.setState({data: temp});
-        }
+        // this.setEmojiPack = (participant, index) => {
+        //     let temp = this.state.data;
+        //     temp[index] = participant;
+        //     console.log("temp participant:", temp);
+        //     this.setState({data: temp});
+        // }
 
         this.execRegister = () => {
             axios.post(`/api/emoji/add`, this.state.newEmojiPack)
                 .then(()=> {
                     this.getEmojiPackList();
                     const newEmojiPack =  {
-                        emojiPackUrl: '',
+                        sourceUrl: '',
                     }
                     this.setState({newEmojiPack: newEmojiPack});
                 })
@@ -135,10 +136,18 @@ class EmojiRepo extends Component {
                             {value?.version}
                         </TableCell>
                         <TableCell>
-                            <CommentShow handleOpen={(comment) => {this.handleCommentShowDialogOpen(comment, index)}} open={this.state.isCommentShowDialogOpen[index]} participant={value} />
+                            <div style={{textAlign: 'center', margin: '20px'}}>
+                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, index)}>
+                                    <ChatBubbleIcon />
+                                </Button>
+                            </div>
                         </TableCell>
                         <TableCell>
-                            <DownloadIcon />
+                            <Button variant={'contained'} color="primary" onClick={() => {
+                                window.open('https://concurrent.world/settings#emoji&install='+value?.sourceUrl, '_blank');
+                            }}>
+                                <DownloadIcon />
+                            </Button>
                         </TableCell>
                     </TableRow>
                 );
@@ -193,7 +202,7 @@ class EmojiRepo extends Component {
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.participantChangeValue} participant={this.state.editEmojiPack} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} />
+                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.participantChangeValue} emojiPack={this.state.editEmojiPack} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} />
                 </div>
             </>
         );

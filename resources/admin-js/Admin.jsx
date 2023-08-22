@@ -40,7 +40,7 @@ class Admin extends Component {
                 remarks: null,
             },
             newEmojiPack: {
-                emojiPackUrl: '',
+                sourceUrl: '',
             }
         }
 
@@ -114,12 +114,17 @@ class Admin extends Component {
                 .then(()=> {
                     this.getEmojiPackList();
                     const newEmojiPack =  {
-                        emojiPackUrl: '',
+                        sourceUrl: '',
                     }
                     this.setState({newEmojiPack: newEmojiPack});
                 })
-                .catch(() => {
-                    alert('登録に失敗しました。時間をおいてお試しください。');
+                .catch((error) => {
+                    let responseData = error.response.data;
+                    if(responseData.message === 'already_registered') {
+                        alert('この絵文字パックは既に登録されています。');
+                    } else {
+                        alert('登録に失敗しました。時間をおいてお試しください。');
+                    }
                 });
         }
 
@@ -137,10 +142,11 @@ class Admin extends Component {
                             {value?.version}
                         </TableCell>
                         <TableCell>
-                            <CommentShow handleOpen={(comment) => {this.handleCommentShowDialogOpen(comment, index)}} open={this.state.isCommentShowDialogOpen[index]} participant={value} />
-                        </TableCell>
-                        <TableCell>
-                            <DownloadIcon />
+                            <Button variant={'contained'} color="primary" onClick={() => {
+                                window.open('https://concurrent.world/settings#emoji&install='+value?.sourceUrl, '_blank');
+                            }}>
+                                <DownloadIcon />
+                            </Button>
                         </TableCell>
                         <TableCell>
                             <div style={{textAlign: 'center', margin: '20px'}}>
@@ -218,6 +224,20 @@ class Admin extends Component {
                         <Typography variant="h6" style={{padding: '10px'}}>
                             {this.props.siteTitle}
                         </Typography>
+                        <Typography variant="h6" style={{
+                            padding: '10px',
+                            position: 'absolute',
+                            right: 0,
+                            top: '-4px'
+                        }}>
+                        <a className="dropdown-item" href="/admin/logout" style={{color: '#fff'}}
+                           onClick={() => {
+                               event.preventDefault();
+                               document.getElementById('logout-form').submit()
+                           }}>
+                            ログアウト
+                        </a>
+                        </Typography>
                     </AppBar>
                 </div>
                 <TableContainer id={'tableRoot'} component={Paper} style={{position: 'relative', width: '80vw', margin: 'auto', marginTop: '60px'}}>
@@ -227,7 +247,6 @@ class Admin extends Component {
                                 <TableCell></TableCell>
                                 <TableCell>絵文字パック名</TableCell>
                                 <TableCell>バージョン</TableCell>
-                                <TableCell>詳細</TableCell>
                                 <TableCell>インストール</TableCell>
                                 <TableCell>編集</TableCell>
                                 <TableCell>削除</TableCell>
@@ -244,7 +263,7 @@ class Admin extends Component {
                     <NewEmojiPackDialog handleOpen={this.handleNewEmojiPackDialogOpen} open={this.state.isNewEmojiPackDialogOpen} handleChange={this.newEmojiPackChangeValue} newEmojiPack={this.state.newEmojiPack} execRegister={this.execRegister}/>
                 </div>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackManageDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.participantChangeValue} participant={this.state.editEmojiPack} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} />
+                    <EmojiPackManageDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.participantChangeValue} emojiPack={this.state.editEmojiPack} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} />
                 </div>
             </>
         );

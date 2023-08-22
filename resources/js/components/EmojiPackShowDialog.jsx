@@ -8,6 +8,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import PropTypes from "prop-types";
 import {Avatar, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@material-ui/core";
+import moment from "moment/moment";
+import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 
 export default function EmojiPackShowDialog(props) {
 
@@ -72,78 +74,75 @@ export default function EmojiPackShowDialog(props) {
             <Dialog open={props.open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">参加者詳細</DialogTitle>
                 <DialogContent>
-                    {/*todo: キャラクタ画像*/}
-                    {/*<Avatar alt="charPhoto" src="/static/images/avatar/1.jpg" style={null} />*/}
+                    <div id={'detailEmojiPackIconArea'} style={{
+                        width: '100%',
+                        margin: '10px 0'
+                    }}>
+                        <img src={props.emojiPack?.iconUrl} style={{
+                            width: '100px',
+                            textAlign: 'center',
+                            margin: 'auto',
+                            display: 'block'
+                        }}></img>
+                    </div>
                     <TextField
                         margin="dense"
-                        label="参加者名"
+                        label="絵文字パック名"
                         type="text"
                         name="name"
-                        onChange={props.handleChange}
+                        // onChange={props.handleChange}
                         value={props.emojiPack?.name}
+                        disabled
                         fullWidth
                     />
                     <TextField
                         margin="dense"
-                        label="LINE名"
+                        label="バージョン"
                         type="text"
-                        name="lineName"
-                        onChange={props.handleChange}
-                        value={props.emojiPack?.lineName}
+                        name="version"
+                        // onChange={props.handleChange}
+                        value={props.emojiPack?.version}
+                        disabled
                         fullWidth
                     />
                     <TextField
                         margin="dense"
-                        label="キャラクター名"
-                        name="characterName"
+                        label="説明"
+                        name="description"
                         type="text"
-                        onChange={props.handleChange}
-                        value={props.emojiPack?.characterName}
+                        // onChange={props.handleChange}
+                        value={props.emojiPack?.description}
+                        disabled
                         fullWidth
                     />
                     <TextField
                         margin="dense"
-                        label="Twitter ID"
-                        name="twitterId"
+                        label="クレジット"
+                        name="credit"
                         type="text"
-                        onChange={props.handleChange}
-                        value={props.emojiPack?.twitterId}
+                        // onChange={props.handleChange}
+                        value={props.emojiPack?.credit}
+                        disabled
                         fullWidth
                     />
                     <TextField
                         margin="dense"
-                        label="参加種別"
-                        name="joinType"
+                        label="作成日時"
+                        name="createdAt"
                         type="text"
-                        onChange={props.handleChange}
-                        value={props.emojiPack?.joinType}
+                        // onChange={props.handleChange}
+                        value={props.emojiPack?.createdAt && moment(props.emojiPack?.createdAt).format('YYYY/MM/DD HH:mm:ss')}
+                        disabled
                         fullWidth
                     />
                     <TextField
                         margin="dense"
                         label="ひとこと"
-                        name="comment"
+                        name="更新日時"
                         type="text"
-                        onChange={props.handleChange}
-                        value={props.emojiPack?.comment}
-                        fullWidth
-                    />
-                    <TextField
-                        margin="dense"
-                        label="備考"
-                        name="remarks"
-                        type="text"
-                        onChange={props.handleChange}
-                        value={props.emojiPack?.remarks}
-                        fullWidth
-                    />
-                    <TextField
-                        margin="dense"
-                        label="参加費"
-                        name="entryFee"
-                        type="text"
-                        onChange={props.handleChange}
-                        value={props.emojiPack?.entryFee}
+                        // onChange={props.handleChange}
+                        value={props.emojiPack?.createdAt && moment(props.emojiPack?.updatedAt).format('YYYY/MM/DD HH:mm:ss')}
+                        disabled
                         fullWidth
                     />
                     {/*todo: 変更地位に値が書き換わるのを防ぐために、一時変数をvalueに導入*/}
@@ -167,10 +166,13 @@ EmojiPackShowDialog.propTypes = {
     handleChange: PropTypes.func,
     execUpdate: PropTypes.func,
     emojiPack: PropTypes.shape({
+        emojiPackId: PropTypes.number,
+        iconUrl: PropTypes.string,
         name: PropTypes.string,
-        characterName: PropTypes.string,
-        lineName: PropTypes.string,
-        payment: PropTypes.string,
-        isPayed: PropTypes.bool,
+        version: PropTypes.string,
+        description: PropTypes.string,
+        credit: PropTypes.string,
+        createdAt: PropTypes.string,
+        updatedAt: PropTypes.string,
     }),
 }

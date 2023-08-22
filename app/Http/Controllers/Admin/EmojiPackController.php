@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\BaseController;
 use App\Models\EmojiPack;
-use App\Models\Participant;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class EmojiPackController extends BaseController
 {
@@ -28,21 +28,39 @@ class EmojiPackController extends BaseController
      */
     public function addEmojiPack(Request $request): JsonResponse
     {
-        $emojiPackUrl = file_get_contents($request->emojiPackUrl);
+        $sourceUrl = file_get_contents($request->sourceUrl);
         try {
-            $emojiPackMetaData = json_decode($emojiPackUrl, true, 512, JSON_THROW_ON_ERROR);
+            $emojiPackMetaData = json_decode($sourceUrl, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
             throw $e;
         }
 
-        $EmojiPack = new EmojiPack();
-        $EmojiPack->fill(array_key_snake($emojiPackMetaData));
-        $EmojiPack->icon_url = $emojiPackMetaData['iconURL'];
-        $EmojiPack->is_approved = true; // 管理画面からの登録はtrueで固定
-        if($EmojiPack->save()){
-            return $this->sendSuccess();
+        $alreadyRegisteredEmojiPack = EmojiPack::whereSourceUrl($request->sourceUrl)->first();
+
+        if (is_null($alreadyRegisteredEmojiPack)) {
+            $EmojiPack = new EmojiPack();
+            $EmojiPack->fill(array_key_snake($emojiPackMetaData));
+            $EmojiPack->source_url = $request->sourceUrl;
+            $EmojiPack->icon_url = $emojiPackMetaData['iconURL'];
+            $EmojiPack->is_approved = true; // 管理画面からの登録はtrueで固定
+            if($EmojiPack->save()){
+                return $this->sendSuccess();
+            }
+            return $this->sendError('failed_save', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return $this->sendError('failed_save');
+
+        if($alreadyRegisteredEmojiPack->version !== $emojiPackMetaData['version']) {
+            $alreadyRegisteredEmojiPack->fill(array_key_snake($emojiPackMetaData));
+            $alreadyRegisteredEmojiPack->source_url = $request->sourceUrl;
+            $alreadyRegisteredEmojiPack->icon_url = $emojiPackMetaData['iconURL'];
+            $alreadyRegisteredEmojiPack->is_approved = true; // 管理画面からの登録はtrueで固定
+            if($alreadyRegisteredEmojiPack->save()){
+                return $this->sendSuccess();
+            }
+            return $this->sendError('failed_save', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return $this->sendError('already_registered', Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     /**
