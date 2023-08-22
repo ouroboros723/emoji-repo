@@ -19,7 +19,7 @@
 {{--    <link rel="manifest" href="/js/manifest.json"/>--}}
 </head>
 <body>
-<div id="root" data-props='{"siteTitle": "{{Config::get('app.name')}}"}'>
+<div id="root" data-props='{"siteTitle": "{{Config::get('app.name')}}", "concurrentRedirectUrl": "{!!Config::get('app.concurrent_redirect_url')!!}"}'>
     {{--    @include('admin.parts.common.loading-spinner')--}}
 </div>
 <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">

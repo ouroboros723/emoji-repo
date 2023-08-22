@@ -143,7 +143,7 @@ class Admin extends Component {
                         </TableCell>
                         <TableCell>
                             <Button variant={'contained'} color="primary" onClick={() => {
-                                window.open('https://concurrent.world/settings#emoji&install='+value?.sourceUrl, '_blank');
+                                window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
                             }}>
                                 <DownloadIcon />
                             </Button>

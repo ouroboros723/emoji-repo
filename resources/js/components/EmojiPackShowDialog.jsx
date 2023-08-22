@@ -137,8 +137,8 @@ export default function EmojiPackShowDialog(props) {
                     />
                     <TextField
                         margin="dense"
-                        label="ひとこと"
-                        name="更新日時"
+                        label="更新日時"
+                        name="updatedAt"
                         type="text"
                         // onChange={props.handleChange}
                         value={props.emojiPack?.createdAt && moment(props.emojiPack?.updatedAt).format('YYYY/MM/DD HH:mm:ss')}

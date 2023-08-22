@@ -19,7 +19,7 @@
 {{--    <link rel="manifest" href="/js/manifest.json"/>--}}
 </head>
 <body>
-<div id="root" data-props='{"siteTitle": "{{Config::get('app.name')}}"}'>
+<div id="root" data-props='{"siteTitle": "{{Config::get('app.name')}}", "concurrentRedirectUrl": "{!!Config::get('app.concurrent_redirect_url')!!}"}'>
     {{--    @include('admin.parts.common.loading-spinner')--}}
 </div>
 <script src="https://cdn.geolonia.com/community-geocoder.js"></script>
