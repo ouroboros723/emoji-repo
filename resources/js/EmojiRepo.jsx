@@ -22,6 +22,7 @@ class EmojiRepo extends Component {
         super(props);
         this.state = {
             data: [],
+            emojis: [],
             isEmojiPackDialogOpen: false,
             isNewEmojiPackDialogOpen: false,
             isCommentShowDialogOpen: [],
@@ -60,6 +61,7 @@ class EmojiRepo extends Component {
         this.handleEmojiPackManageDialogOpen = (open, index) => {
             if(open === true) {
                 let editEmojiPack = this.state.data[index];
+                this.getEmojiList(editEmojiPack?.emojiPackId);
                 this.setState({editEmojiPack: editEmojiPack});
             } else {
                 let editEmojiPack = {
@@ -75,6 +77,7 @@ class EmojiRepo extends Component {
                     remarks: null,
                 }
                 this.setState({editEmojiPack: editEmojiPack});
+                this.setState({emojis: []});
             }
             this.setState({isEmojiPackDialogOpen: open});
         }
@@ -156,15 +159,25 @@ class EmojiRepo extends Component {
                     this.setState({isLoaded: true});
                 });
         }
+
+        this.getEmojiList = (emojiPackId) => {
+            if(emojiPackId) {
+                axios.get("/api/emoji/"+emojiPackId)
+                    .then((response) => {
+                        this.setState({emojis: response.data.body?.emojis ?? []});
+                    });
+            }
+        }
     }
 
     componentDidMount() {
+        this.getEmojiPackList();
         // setTimeout(() => { // テスト用
         //     this.getEmojiPackList();
         // }, 8000);
-        setInterval(() => {
-            this.getEmojiPackList();
-        }, 8000);
+        // setInterval(() => {
+        //     this.getEmojiPackList();
+        // }, 8000);
     }
 
     render() {
@@ -197,7 +210,7 @@ class EmojiRepo extends Component {
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} />
+                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} emojis={this.state.emojis} />
                 </div>
             </>
         );

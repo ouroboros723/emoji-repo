@@ -54,7 +54,8 @@ class EmojiPackController extends BaseController
      */
     public function showEmojiPackDetail($id): JsonResponse
     {
-//        dd($request->toArray());
-        return $this->sendResponse(array_key_camel(EmojiPack::findOrFail($id)->toArray()));
+        $EmojiPack = EmojiPack::findOrFail($id);
+        $EmojiPack->emojis = json_decode(file_get_contents($EmojiPack->source_url), true, 512, JSON_THROW_ON_ERROR)['emojis'] ?? [];
+        return $this->sendResponse(array_key_camel($EmojiPack->toArray()));
     }
 }

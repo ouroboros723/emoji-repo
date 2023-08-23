@@ -30,5 +30,5 @@ Route::middleware('auth:api')->group(function () {
 
 Route::prefix('/emoji')->group(static function () {
     Route::get('/', [App\Http\Controllers\User\EmojiPackController::class, 'getList']);
-    Route::get('/{id}', [App\Http\Controllers\User\EmojiPackController::class, 'showEmojiDetail']);
+    Route::get('/{id}', [App\Http\Controllers\User\EmojiPackController::class, 'showEmojiPackDetail']);
 });

@@ -49,6 +49,19 @@ export default function EmojiPackManageDialog(props) {
         }
     }
 
+    const showEmojiList = () => {
+        if(props.emojis) {
+            return props.emojis.map((value, index) => {
+                console.log(value);
+                return (
+                    <img alt={value?.shortcode} title={':'+value?.shortcode+':'} src={value.imageURL} style={{height: '30px'}} loading="lazy"></img>
+                );
+            });
+        } else {
+            return null;
+        }
+    }
+
     // const handleChangeEmojiPack = (e) => {
     //     let temp = props.emojiPack;
     //     temp[e.target.name] = e.target.value;
@@ -120,7 +133,10 @@ export default function EmojiPackManageDialog(props) {
                         label="更新日時"
                         text={props.emojiPack?.createdAt && moment(props.emojiPack?.updatedAt).format('YYYY/MM/DD HH:mm:ss')}
                     />
-                    {/*todo: ここに全絵文字のプレビューを表示*/}
+                    <div id={'emojisList'}>
+                        <p>絵文字プレビュー</p>
+                        {showEmojiList()}
+                    </div>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
@@ -140,8 +156,10 @@ EmojiPackManageDialog.propTypes = {
     handleOpen: PropTypes.func,
     handleChange: PropTypes.func,
     execUpdate: PropTypes.func,
+    emojis: PropTypes.array.isRequired,
     emojiPack: PropTypes.shape({
         emojiPackId: PropTypes.number,
+        sourceUrl: PropTypes.string,
         iconUrl: PropTypes.string,
         name: PropTypes.string,
         version: PropTypes.string,

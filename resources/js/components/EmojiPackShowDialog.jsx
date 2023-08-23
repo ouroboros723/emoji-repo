@@ -13,7 +13,6 @@ import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 import TextShow from "./TextShow";
 
 export default function EmojiPackShowDialog(props) {
-
     const yenFormatter = new Intl.NumberFormat('ja-JP', {
         style: 'currency',
         currency: 'JPY',
@@ -47,6 +46,19 @@ export default function EmojiPackShowDialog(props) {
                 }
             };
             props.handleChange(dummyE);
+        }
+    }
+
+    const showEmojiList = () => {
+        if(props.emojis) {
+            return props.emojis.map((value, index) => {
+                console.log(value);
+                return (
+                    <img alt={value?.shortcode} title={':'+value?.shortcode+':'} src={value.imageURL} style={{height: '30px'}} loading="lazy"></img>
+                );
+            });
+        } else {
+            return null;
         }
     }
 
@@ -131,7 +143,10 @@ export default function EmojiPackShowDialog(props) {
                         disabled
                         fullWidth
                     />
-                    {/*todo: ここに全絵文字のプレビューを表示*/}
+                    <div id={'emojisList'}>
+                        <p>絵文字プレビュー</p>
+                        {showEmojiList()}
+                    </div>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
@@ -147,8 +162,10 @@ EmojiPackShowDialog.propTypes = {
     open: PropTypes.bool,
     handleOpen: PropTypes.func,
     handleChange: PropTypes.func,
+    emojis: PropTypes.array.isRequired,
     emojiPack: PropTypes.shape({
         emojiPackId: PropTypes.number,
+        sourceUrl: PropTypes.string,
         iconUrl: PropTypes.string,
         name: PropTypes.string,
         version: PropTypes.string,
