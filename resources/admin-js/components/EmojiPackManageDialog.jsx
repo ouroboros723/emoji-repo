@@ -55,21 +55,15 @@ export default function EmojiPackManageDialog(props) {
     //     props.setEmojiPack(temp, temp.id);
     // };
 
-    const handleChangePayment = (e) => {
-        setPayment(e.target.value);
-    };
-
     const execUpdate = () => {
         props.execUpdate(props.emojiPack.emojiPackId);
         handleClose();
     }
 
-    const [payment, setPayment] = useState(4000);
-
     return (
         <div>
             <Dialog open={props.open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">絵文字パック詳細</DialogTitle>
+                <DialogTitle id="form-dialog-title">絵文字パック編集</DialogTitle>
                 <DialogContent>
                     <div id={'detailEmojiPackIconArea'} style={{
                         width: '100%',
@@ -126,7 +120,7 @@ export default function EmojiPackManageDialog(props) {
                         label="更新日時"
                         text={props.emojiPack?.createdAt && moment(props.emojiPack?.updatedAt).format('YYYY/MM/DD HH:mm:ss')}
                     />
-                    {/*todo: 変更地位に値が書き換わるのを防ぐために、一時変数をvalueに導入*/}
+                    {/*todo: ここに全絵文字のプレビューを表示*/}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">

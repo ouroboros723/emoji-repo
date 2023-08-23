@@ -56,21 +56,15 @@ export default function EmojiPackShowDialog(props) {
     //     props.setEmojiPack(temp, temp.id);
     // };
 
-    const handleChangePayment = (e) => {
-        setPayment(e.target.value);
-    };
-
     const execUpdate = () => {
         props.execUpdate(props.emojiPack.emojiPackId);
         handleClose();
     }
 
-    const [payment, setPayment] = useState(4000);
-
     return (
         <div>
             <Dialog open={props.open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">参加者詳細</DialogTitle>
+                <DialogTitle id="form-dialog-title">絵文字パック詳細</DialogTitle>
                 <DialogContent>
                     <div id={'detailEmojiPackIconArea'} style={{
                         width: '100%',
@@ -137,7 +131,7 @@ export default function EmojiPackShowDialog(props) {
                         disabled
                         fullWidth
                     />
-                    {/*todo: 変更地位に値が書き換わるのを防ぐために、一時変数をvalueに導入*/}
+                    {/*todo: ここに全絵文字のプレビューを表示*/}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
