@@ -9,6 +9,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import PropTypes from "prop-types";
 import {Avatar, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@material-ui/core";
 import moment from "moment";
+import TextShow from "./TextShow";
 
 export default function EmojiPackManageDialog(props) {
 
@@ -27,8 +28,6 @@ export default function EmojiPackManageDialog(props) {
     };
 
     const handleChangeBool = (e) => {
-        // console.log(e.target.value);
-
         if(Number(e.target.value) === 1) {
             let dummyE = {
                 target: {
@@ -53,7 +52,6 @@ export default function EmojiPackManageDialog(props) {
     // const handleChangeEmojiPack = (e) => {
     //     let temp = props.emojiPack;
     //     temp[e.target.name] = e.target.value;
-    //     console.log("parent emojiPack:", temp);
     //     props.setEmojiPack(temp, temp.id);
     // };
 
@@ -62,7 +60,7 @@ export default function EmojiPackManageDialog(props) {
     };
 
     const execUpdate = () => {
-        props.execUpdate(props.emojiPack.id);
+        props.execUpdate(props.emojiPack.emojiPackId);
         handleClose();
     }
 
@@ -120,25 +118,13 @@ export default function EmojiPackManageDialog(props) {
                         value={props.emojiPack?.credit}
                         fullWidth
                     />
-                    <TextField
-                        margin="dense"
+                    <TextShow
                         label="作成日時"
-                        name="createdAt"
-                        type="text"
-                        onChange={props.handleChange}
-                        value={props.emojiPack?.createdAt && moment(props.emojiPack?.createdAt).format('YYYY/MM/DD HH:mm:ss')}
-                        disabled
-                        fullWidth
+                        text={props.emojiPack?.createdAt && moment(props.emojiPack?.createdAt).format('YYYY/MM/DD HH:mm:ss')}
                     />
-                    <TextField
-                        margin="dense"
+                    <TextShow
                         label="更新日時"
-                        name="updatedAt"
-                        type="text"
-                        onChange={props.handleChange}
-                        value={props.emojiPack?.createdAt && moment(props.emojiPack?.updatedAt).format('YYYY/MM/DD HH:mm:ss')}
-                        disabled
-                        fullWidth
+                        text={props.emojiPack?.createdAt && moment(props.emojiPack?.updatedAt).format('YYYY/MM/DD HH:mm:ss')}
                     />
                     {/*todo: 変更地位に値が書き換わるのを防ぐために、一時変数をvalueに導入*/}
                 </DialogContent>

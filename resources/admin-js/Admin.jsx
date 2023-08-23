@@ -28,16 +28,14 @@ class Admin extends Component {
             isCommentShowDialogOpen: [],
             isLoaded: false,
             editEmojiPack: {
-                participantKind: null,
+                emojiPackId: null,
+                iconUrl: '',
                 name: '',
-                characterName: '',
-                lineName: '',
-                twitterId: '',
-                comment: '',
-                isPayed: null,
-                entryFee: null,
-                joinType: null,
-                remarks: null,
+                version: '',
+                description: '',
+                credit: '',
+                createdAt: '',
+                updatedAt: '',
             },
             newEmojiPack: {
                 sourceUrl: '',
@@ -59,23 +57,19 @@ class Admin extends Component {
         }
 
         this.handleEmojiPackManageDialogOpen = (open, index) => {
-            console.log('open: ', open);
             if(open === true) {
                 let editEmojiPack = this.state.data[index];
-                console.log('editEmojiPack:', editEmojiPack);
                 this.setState({editEmojiPack: editEmojiPack});
             } else {
                 let editEmojiPack = {
-                    participantKind: null,
+                    emojiPackId: null,
+                    iconUrl: '',
                     name: '',
-                    characterName: '',
-                    lineName: '',
-                    twitterId: '',
-                    comment: '',
-                    isPayed: null,
-                    entryFee: null,
-                    joinType: null,
-                    remarks: null,
+                    version: '',
+                    description: '',
+                    credit: '',
+                    createdAt: '',
+                    updatedAt: '',
                 }
                 this.setState({editEmojiPack: editEmojiPack});
             }
@@ -94,18 +88,18 @@ class Admin extends Component {
             this.setState({newEmojiPack: newEmojiPack});
         }
 
-        this.participantChangeValue = (e) => {
-            let participant = this.state.editEmojiPack;
-            console.log(participant);
-            participant[e.target.name] = e.target.value;
-            console.log("parent participant:", participant);
-            this.setState({editEmojiPack: participant});
+        this.emojiPackChangeValue = (e) => {
+            let emojiPack = this.state.editEmojiPack;
+            ;
+            emojiPack[e.target.name] = e.target.value;
+            ;
+            this.setState({editEmojiPack: emojiPack});
         }
 
-        this.setEmojiPack = (participant, index) => {
+        this.setEmojiPack = (emojiPack, index) => {
             let temp = this.state.data;
-            temp[index] = participant;
-            console.log("temp participant:", temp);
+            temp[index] = emojiPack;
+            ;
             this.setState({data: temp});
         }
 
@@ -185,16 +179,6 @@ class Admin extends Component {
             }
         }
 
-        this.setPayed = (id) => {
-            if (window.confirm('支払済みにしますか？')) {
-                this.setState({isLoaded: false});
-                axios.post(`/api/admin/emoji/set-payed/${id}`)
-                    .then(() => {
-                        this.getEmojiPackList();
-                    });
-            }
-        }
-
         this.deleteEmojiPack = ((id, name) => {
             if (window.confirm('絵文字パック "' + name + '" を削除しますか？')) {
                 this.setState({isLoaded: false});
@@ -263,7 +247,7 @@ class Admin extends Component {
                     <NewEmojiPackDialog handleOpen={this.handleNewEmojiPackDialogOpen} open={this.state.isNewEmojiPackDialogOpen} handleChange={this.newEmojiPackChangeValue} newEmojiPack={this.state.newEmojiPack} execRegister={this.execRegister}/>
                 </div>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackManageDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.participantChangeValue} emojiPack={this.state.editEmojiPack} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} />
+                    <EmojiPackManageDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} />
                 </div>
             </>
         );

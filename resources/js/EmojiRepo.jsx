@@ -27,7 +27,7 @@ class EmojiRepo extends Component {
             isCommentShowDialogOpen: [],
             isLoaded: false,
             editEmojiPack: {
-                participantKind: null,
+                emojiPackKind: null,
                 name: '',
                 characterName: '',
                 lineName: '',
@@ -58,14 +58,12 @@ class EmojiRepo extends Component {
         }
 
         this.handleEmojiPackManageDialogOpen = (open, index) => {
-            console.log('open: ', open);
             if(open === true) {
                 let editEmojiPack = this.state.data[index];
-                console.log('editEmojiPack:', editEmojiPack);
                 this.setState({editEmojiPack: editEmojiPack});
             } else {
                 let editEmojiPack = {
-                    participantKind: null,
+                    emojiPackKind: null,
                     name: '',
                     characterName: '',
                     lineName: '',
@@ -93,18 +91,15 @@ class EmojiRepo extends Component {
             this.setState({newEmojiPack: newEmojiPack});
         }
 
-        // this.participantChangeValue = (e) => {
-        //     let participant = this.state.editEmojiPack;
-        //     console.log(participant);
-        //     participant[e.target.name] = e.target.value;
-        //     console.log("parent participant:", participant);
-        //     this.setState({editEmojiPack: participant});
+        // this.emojiPackChangeValue = (e) => {
+        //     let emojiPack = this.state.editEmojiPack;
+        //     emojiPack[e.target.name] = e.target.value;
+        //     this.setState({editEmojiPack: emojiPack});
         // }
 
-        // this.setEmojiPack = (participant, index) => {
+        // this.setEmojiPack = (emojiPack, index) => {
         //     let temp = this.state.data;
-        //     temp[index] = participant;
-        //     console.log("temp participant:", temp);
+        //     temp[index] = emojiPack;
         //     this.setState({data: temp});
         // }
 
@@ -202,7 +197,7 @@ class EmojiRepo extends Component {
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.participantChangeValue} emojiPack={this.state.editEmojiPack} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} />
+                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} />
                 </div>
             </>
         );

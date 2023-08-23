@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class ModifyEmojiPacksAddColumnSourceUrl extends Migration
+class ModifyEmojiPacksSetNullableCredit extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,8 @@ class ModifyEmojiPacksAddColumnSourceUrl extends Migration
     public function up()
     {
         Schema::table('emoji_packs', function (Blueprint $table) {
-            $table->text('source_url')->comment('絵文字パックURL');
-            $table->text('icon_url')->comment('絵文字パック アイコンURL')->change();
+            $table->text('description')->nullable()->comment('詳細')->change();
+            $table->text('credit')->nullable()->comment('クレジット')->change();
         });
     }
 
@@ -27,8 +27,8 @@ class ModifyEmojiPacksAddColumnSourceUrl extends Migration
     public function down()
     {
         Schema::table('emoji_packs', function (Blueprint $table) {
-            $table->dropColumn(['source_url']);
-            $table->string('icon_url', 8000)->comment('絵文字パックURL')->change();
+            $table->text('description')->nullable(false)->comment('詳細')->change();
+            $table->text('credit')->nullable(false)->comment('クレジット')->change();
         });
     }
 }

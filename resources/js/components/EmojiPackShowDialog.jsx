@@ -10,6 +10,7 @@ import PropTypes from "prop-types";
 import {Avatar, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@material-ui/core";
 import moment from "moment/moment";
 import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
+import TextShow from "./TextShow";
 
 export default function EmojiPackShowDialog(props) {
 
@@ -28,8 +29,6 @@ export default function EmojiPackShowDialog(props) {
     };
 
     const handleChangeBool = (e) => {
-        // console.log(e.target.value);
-
         if(Number(e.target.value) === 1) {
             let dummyE = {
                 target: {
@@ -54,7 +53,6 @@ export default function EmojiPackShowDialog(props) {
     // const handleChangeEmojiPack = (e) => {
     //     let temp = props.emojiPack;
     //     temp[e.target.name] = e.target.value;
-    //     console.log("parent emojiPack:", temp);
     //     props.setEmojiPack(temp, temp.id);
     // };
 
@@ -63,7 +61,7 @@ export default function EmojiPackShowDialog(props) {
     };
 
     const execUpdate = () => {
-        props.execUpdate(props.emojiPack.id);
+        props.execUpdate(props.emojiPack.emojiPackId);
         handleClose();
     }
 
@@ -85,63 +83,57 @@ export default function EmojiPackShowDialog(props) {
                             display: 'block'
                         }}></img>
                     </div>
-                    <TextField
-                        margin="dense"
+                    <TextShow
                         label="絵文字パック名"
-                        type="text"
-                        name="name"
-                        // onChange={props.handleChange}
-                        value={props.emojiPack?.name}
-                        disabled
-                        fullWidth
+                        text={props.emojiPack?.name}
                     />
-                    <TextField
+                    <TextShow
                         margin="dense"
                         label="バージョン"
                         type="text"
                         name="version"
                         // onChange={props.handleChange}
-                        value={props.emojiPack?.version}
+                        text={props.emojiPack?.version}
                         disabled
                         fullWidth
                     />
-                    <TextField
+                    <TextShow
                         margin="dense"
                         label="説明"
                         name="description"
                         type="text"
                         // onChange={props.handleChange}
-                        value={props.emojiPack?.description}
+                        text={props.emojiPack?.description}
                         disabled
                         fullWidth
                     />
-                    <TextField
+                    <TextShow
                         margin="dense"
                         label="クレジット"
                         name="credit"
                         type="text"
                         // onChange={props.handleChange}
-                        value={props.emojiPack?.credit}
+                        text={props.emojiPack?.credit}
                         disabled
                         fullWidth
                     />
-                    <TextField
+                    <TextShow
                         margin="dense"
                         label="作成日時"
                         name="createdAt"
                         type="text"
                         // onChange={props.handleChange}
-                        value={props.emojiPack?.createdAt && moment(props.emojiPack?.createdAt).format('YYYY/MM/DD HH:mm:ss')}
+                        text={props.emojiPack?.createdAt && moment(props.emojiPack?.createdAt).format('YYYY/MM/DD HH:mm:ss')}
                         disabled
                         fullWidth
                     />
-                    <TextField
+                    <TextShow
                         margin="dense"
                         label="更新日時"
                         name="updatedAt"
                         type="text"
                         // onChange={props.handleChange}
-                        value={props.emojiPack?.createdAt && moment(props.emojiPack?.updatedAt).format('YYYY/MM/DD HH:mm:ss')}
+                        text={props.emojiPack?.createdAt && moment(props.emojiPack?.updatedAt).format('YYYY/MM/DD HH:mm:ss')}
                         disabled
                         fullWidth
                     />
@@ -149,10 +141,7 @@ export default function EmojiPackShowDialog(props) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
-                        キャンセル
-                    </Button>
-                    <Button onClick={execUpdate} color="primary">
-                        登録
+                        OK
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -164,7 +153,6 @@ EmojiPackShowDialog.propTypes = {
     open: PropTypes.bool,
     handleOpen: PropTypes.func,
     handleChange: PropTypes.func,
-    execUpdate: PropTypes.func,
     emojiPack: PropTypes.shape({
         emojiPackId: PropTypes.number,
         iconUrl: PropTypes.string,

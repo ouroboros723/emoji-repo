@@ -19,7 +19,5 @@ import AppRouter from "./AppRouter";
 
 // boot React
 const element = document.getElementById('root')
-console.log(element.dataset.props);
 const props = JSON.parse(element.dataset.props) // data-propsの内容を取得
-console.log('global props', props);
 ReactDOM.render(<AppRouter {...props}/>, document.getElementById('root'));
