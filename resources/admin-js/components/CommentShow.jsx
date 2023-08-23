@@ -27,7 +27,6 @@ export default function CommentShow(props) {
     };
 
     const handleChangeBool = (e) => {
-        // console.log(e.target.value);
 
         if(Number(e.target.value) === 1) {
             let dummyE = {
@@ -53,7 +52,6 @@ export default function CommentShow(props) {
     // const handleChangeParticipant = (e) => {
     //     let temp = props.participant;
     //     temp[e.target.name] = e.target.value;
-    //     console.log("parent participant:", temp);
     //     props.setParticipant(temp, temp.id);
     // };
 

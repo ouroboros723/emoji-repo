@@ -38,12 +38,12 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'admins',
         ],
 
         'api' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'admins',
         ],
     ],
 
@@ -65,9 +65,9 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'admins' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Participant::class,
+            'model' => App\Models\Admin::class,
         ],
 
         // 'users' => [
@@ -114,6 +114,8 @@ return [
     'password_timeout' => 10800,
 
     'access_token' => env('ACCESS_TOKEN'),
-    'admin_token' => env('ADMIN_TOKEN'),
+//    'admin_token' => env('ADMIN_TOKEN'),
+    'admin_id' => env('ADMIN_ID'),
+    'admin_password' => env('ADMIN_PASS'),
 
 ];

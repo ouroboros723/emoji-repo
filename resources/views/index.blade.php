@@ -19,16 +19,12 @@
 {{--    <link rel="manifest" href="/js/manifest.json"/>--}}
 </head>
 <body>
-<div id="root">
+<div id="root" data-props='{"siteTitle": "{{Config::get('app.name')}}", "concurrentRedirectUrl": "{!!Config::get('app.concurrent_redirect_url')!!}"}'>
     {{--    @include('admin.parts.common.loading-spinner')--}}
 </div>
 <script src="https://cdn.geolonia.com/community-geocoder.js"></script>
 <script src="{{ mix('js/app.js') }}"></script>
 <link href="{{ mix('css/app.css') }}" rel="stylesheet" />
 <script src="https://ajaxzip3.github.io/ajaxzip3.js" charset="UTF-8"></script>
-<script>
-    let token = '{{Config::get('auth.access_token')}}'
-    let title = '{{Config::get('app.name')}}'
-</script>
 @csrf
 </body>
