@@ -27,5 +27,4 @@
 - `docker-compose exec app php artisan admin:delete-user --id=管理者ID` 管理者ユーザーを追加します。
 
 # ライセンス
-- 当ソフトウェアはGPL v3.0に準拠します。
-- 一部のシステムアイコンに[icon8](https://icons8.jp/)の画像を使用しています。
+- 当ソフトウェアはApache License v2.0に準拠します。
