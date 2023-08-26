@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\BaseController;
+use App\Http\Requests\User\AddEmojiPackRequest;
 use App\Models\EmojiPack;
-use Auth;
-use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use JsonException;
-use Session;
 
 class EmojiPackController extends BaseController
 {
@@ -25,11 +22,11 @@ class EmojiPackController extends BaseController
     }
 
     /**
-     * @param Request $request
+     * @param AddEmojiPackRequest $request
      * @return JsonResponse
      * @throws JsonException
      */
-    public function addEmojiPack(Request $request): JsonResponse
+    public function addEmojiPack(AddEmojiPackRequest $request): JsonResponse
     {
         $sourceUrl = file_get_contents($request->sourceUrl);
         try {
@@ -49,7 +46,7 @@ class EmojiPackController extends BaseController
     }
 
     /**
-     * @param $id
+     * @param  $id integer 絵文字パックURL
      * @return JsonResponse
      */
     public function showEmojiPackDetail($id): JsonResponse

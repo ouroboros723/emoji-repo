@@ -210,7 +210,7 @@ class EmojiRepo extends Component {
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} emojis={this.state.emojis} />
+                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} />
                 </div>
             </>
         );

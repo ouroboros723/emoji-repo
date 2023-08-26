@@ -120,7 +120,7 @@ class Admin extends Component {
                     if(responseData.message === 'already_registered') {
                         alert('この絵文字パックは既に登録されています。');
                     } else {
-                        alert('登録に失敗しました。時間をおいてお試しください。');
+                        alert("登録に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
                     }
                 });
         }
@@ -187,6 +187,10 @@ class Admin extends Component {
                 axios.post(`/api/admin/emoji/${id}`, this.state.editEmojiPack)
                     .then(() => {
                         this.getEmojiPackList();
+                    })
+                    .catch((error) => {
+                        let responseData = error.response.data;
+                        alert("登録に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
                     });
             }
         }
@@ -260,7 +264,7 @@ class Admin extends Component {
                     <NewEmojiPackDialog handleOpen={this.handleNewEmojiPackDialogOpen} open={this.state.isNewEmojiPackDialogOpen} handleChange={this.newEmojiPackChangeValue} newEmojiPack={this.state.newEmojiPack} execRegister={this.execRegister}/>
                 </div>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackManageDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} emojis={this.state.emojis} />
+                    <EmojiPackManageDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} />
                 </div>
             </>
         );

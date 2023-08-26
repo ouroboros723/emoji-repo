@@ -10,6 +10,7 @@ import PropTypes from "prop-types";
 import {Avatar, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@material-ui/core";
 import moment from "moment";
 import TextShow from "./TextShow";
+import DownloadIcon from "@mui/icons-material/Download";
 
 export default function EmojiPackManageDialog(props) {
 
@@ -139,11 +140,16 @@ export default function EmojiPackManageDialog(props) {
                     </div>
                 </DialogContent>
                 <DialogActions>
+                    <Button variant={'contained'} color="primary" style={{position: 'absolute', left: '10px'}} onClick={() => {
+                        window.open(props?.concurrentRedirectUrl+props.emojiPack?.sourceUrl, '_blank');
+                    }}>
+                        <DownloadIcon /> インストール
+                    </Button>
                     <Button onClick={handleClose} color="primary">
                         キャンセル
                     </Button>
                     <Button onClick={execUpdate} color="primary">
-                        登録
+                        更新
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -156,6 +162,7 @@ EmojiPackManageDialog.propTypes = {
     handleOpen: PropTypes.func,
     handleChange: PropTypes.func,
     execUpdate: PropTypes.func,
+    concurrentRedirectUrl: PropTypes.string,
     emojis: PropTypes.array.isRequired,
     emojiPack: PropTypes.shape({
         emojiPackId: PropTypes.number,

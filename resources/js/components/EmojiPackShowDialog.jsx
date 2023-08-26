@@ -11,6 +11,7 @@ import {Avatar, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} fro
 import moment from "moment/moment";
 import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 import TextShow from "./TextShow";
+import DownloadIcon from "@mui/icons-material/Download";
 
 export default function EmojiPackShowDialog(props) {
     const yenFormatter = new Intl.NumberFormat('ja-JP', {
@@ -149,6 +150,11 @@ export default function EmojiPackShowDialog(props) {
                     </div>
                 </DialogContent>
                 <DialogActions>
+                    <Button variant={'contained'} color="primary" style={{position: 'absolute', left: '10px'}} onClick={() => {
+                        window.open(props?.concurrentRedirectUrl+props.emojiPack?.sourceUrl, '_blank');
+                    }}>
+                        <DownloadIcon /> インストール
+                    </Button>
                     <Button onClick={handleClose} color="primary">
                         OK
                     </Button>
@@ -163,6 +169,7 @@ EmojiPackShowDialog.propTypes = {
     handleOpen: PropTypes.func,
     handleChange: PropTypes.func,
     emojis: PropTypes.array.isRequired,
+    concurrentRedirectUrl: PropTypes.string,
     emojiPack: PropTypes.shape({
         emojiPackId: PropTypes.number,
         sourceUrl: PropTypes.string,

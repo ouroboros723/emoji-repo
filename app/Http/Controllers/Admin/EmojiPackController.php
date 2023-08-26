@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\BaseController;
+use App\Http\Requests\Admin\AddEmojiPackRequest;
+use App\Http\Requests\Admin\EditEmojiPackRequest;
 use App\Models\EmojiPack;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use JsonException;
 use Symfony\Component\HttpFoundation\Response;
 
 class EmojiPackController extends BaseController
@@ -23,17 +25,14 @@ class EmojiPackController extends BaseController
     }
 
     /**
-     * @param Request $request
+     * @param AddEmojiPackRequest $request
      * @return JsonResponse
+     * @throws JsonException
      */
-    public function addEmojiPack(Request $request): JsonResponse
+    public function addEmojiPack(AddEmojiPackRequest $request): JsonResponse
     {
         $sourceUrl = file_get_contents($request->sourceUrl);
-        try {
-            $emojiPackMetaData = json_decode($sourceUrl, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            throw $e;
-        }
+        $emojiPackMetaData = json_decode($sourceUrl, true, 512, JSON_THROW_ON_ERROR);
 
         $alreadyRegisteredEmojiPack = EmojiPack::whereSourceUrl($request->sourceUrl)->first();
 
@@ -64,8 +63,7 @@ class EmojiPackController extends BaseController
     }
 
     /**
-     * @param $token
-     * @param $id
+     * @param  $id integer 絵文字パックID
      * @return JsonResponse
      */
     public function showEmojiPackDetail($id): JsonResponse
@@ -76,12 +74,11 @@ class EmojiPackController extends BaseController
     }
 
     /**
-     * @param Request $request
-     * @param $token
-     * @param $id
+     * @param EditEmojiPackRequest $request
+     * @param $id integer 絵文字パックID
      * @return JsonResponse
      */
-    public function editEmojiPack(Request $request, $id): JsonResponse
+    public function editEmojiPack(EditEmojiPackRequest $request, $id): JsonResponse
     {
 //        dd($request->toArray());
         $Participant = EmojiPack::findOrFail($id);
@@ -93,8 +90,7 @@ class EmojiPackController extends BaseController
     }
 
     /**
-     * @param $token
-     * @param $id
+     * @param $id integer 絵文字パックID
      * @return JsonResponse
      */
     public function setApproved($id): JsonResponse
@@ -108,8 +104,7 @@ class EmojiPackController extends BaseController
     }
 
     /**
-     * @param $token
-     * @param $id
+     * @param $id integer 絵文字パックID
      * @return JsonResponse
      * @throws Exception
      */
