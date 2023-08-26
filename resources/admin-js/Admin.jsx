@@ -186,11 +186,14 @@ class Admin extends Component {
                 this.setState({isLoaded: false});
                 axios.post(`/api/admin/emoji/${id}`, this.state.editEmojiPack)
                     .then(() => {
-                        this.getEmojiPackList();
+
                     })
                     .catch((error) => {
                         let responseData = error.response.data;
                         alert("登録に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
+                    })
+                    .finally(() => {
+                        this.getEmojiPackList();
                     });
             }
         }
