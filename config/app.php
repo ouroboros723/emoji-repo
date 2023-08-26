@@ -229,4 +229,6 @@ return [
 
     ],
 
+    'concurrent_redirect_url' => env('CONCURRENT_REDIRECT_URL'),
+
 ];

@@ -18,4 +18,6 @@ import ReactDOM from 'react-dom';
 import AppRouter from "./AppRouter";
 
 // boot React
-ReactDOM.render(<AppRouter/>, document.getElementById('root'));
+const element = document.getElementById('root');
+const props = JSON.parse(element.dataset.props); // data-propsの内容を取得
+ReactDOM.render(<AppRouter {...props}/>, document.getElementById('root'));

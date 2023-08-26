@@ -12,13 +12,12 @@ import {
     TableRow, Typography
 } from "@material-ui/core";
 import axios from "axios";
-import EmojiPackManageDialog from "./components/EmojiPackManageDialog";
-import NewEmojiPackDialog from "./components/NewEmojiPackDialog";
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import CommentShow from "../admin-js/components/CommentShow";
 import DownloadIcon from '@mui/icons-material/Download';
+import EmojiPackShowDialog from "./components/EmojiPackShowDialog";
+import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 
-class Admin extends Component {
+class EmojiRepo extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -29,14 +28,16 @@ class Admin extends Component {
             isCommentShowDialogOpen: [],
             isLoaded: false,
             editEmojiPack: {
-                emojiPackId: null,
-                iconUrl: '',
+                emojiPackKind: null,
                 name: '',
-                version: '',
-                description: '',
-                credit: '',
-                createdAt: '',
-                updatedAt: '',
+                characterName: '',
+                lineName: '',
+                twitterId: '',
+                comment: '',
+                isPayed: null,
+                entryFee: null,
+                joinType: null,
+                remarks: null,
             },
             newEmojiPack: {
                 sourceUrl: '',
@@ -64,14 +65,16 @@ class Admin extends Component {
                 this.setState({editEmojiPack: editEmojiPack});
             } else {
                 let editEmojiPack = {
-                    emojiPackId: null,
-                    iconUrl: '',
+                    emojiPackKind: null,
                     name: '',
-                    version: '',
-                    description: '',
-                    credit: '',
-                    createdAt: '',
-                    updatedAt: '',
+                    characterName: '',
+                    lineName: '',
+                    twitterId: '',
+                    comment: '',
+                    isPayed: null,
+                    entryFee: null,
+                    joinType: null,
+                    remarks: null,
                 }
                 this.setState({editEmojiPack: editEmojiPack});
                 this.setState({emojis: []});
@@ -80,9 +83,9 @@ class Admin extends Component {
         }
 
         this.handleCommentShowDialogOpen = (open, index) => {
-                let isCommentShowDialogOpen = this.state.isCommentShowDialogOpen;
-                isCommentShowDialogOpen[index] = open;
-                this.setState({isCommentShowDialogOpen: isCommentShowDialogOpen});
+            let isCommentShowDialogOpen = this.state.isCommentShowDialogOpen;
+            isCommentShowDialogOpen[index] = open;
+            this.setState({isCommentShowDialogOpen: isCommentShowDialogOpen});
         }
 
         this.newEmojiPackChangeValue = (e) => {
@@ -91,23 +94,20 @@ class Admin extends Component {
             this.setState({newEmojiPack: newEmojiPack});
         }
 
-        this.emojiPackChangeValue = (e) => {
-            let emojiPack = this.state.editEmojiPack;
-            ;
-            emojiPack[e.target.name] = e.target.value;
-            ;
-            this.setState({editEmojiPack: emojiPack});
-        }
+        // this.emojiPackChangeValue = (e) => {
+        //     let emojiPack = this.state.editEmojiPack;
+        //     emojiPack[e.target.name] = e.target.value;
+        //     this.setState({editEmojiPack: emojiPack});
+        // }
 
-        this.setEmojiPack = (emojiPack, index) => {
-            let temp = this.state.data;
-            temp[index] = emojiPack;
-            ;
-            this.setState({data: temp});
-        }
+        // this.setEmojiPack = (emojiPack, index) => {
+        //     let temp = this.state.data;
+        //     temp[index] = emojiPack;
+        //     this.setState({data: temp});
+        // }
 
         this.execRegister = () => {
-            axios.post(`/api/admin/emoji/add`, this.state.newEmojiPack)
+            axios.post(`/api/emoji/add`, this.state.newEmojiPack)
                 .then(()=> {
                     this.getEmojiPackList();
                     const newEmojiPack =  {
@@ -115,13 +115,8 @@ class Admin extends Component {
                     }
                     this.setState({newEmojiPack: newEmojiPack});
                 })
-                .catch((error) => {
-                    let responseData = error.response.data;
-                    if(responseData.message === 'already_registered') {
-                        alert('この絵文字パックは既に登録されています。');
-                    } else {
-                        alert("登録に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
-                    }
+                .catch(() => {
+                    alert('登録に失敗しました。時間をおいてお試しください。');
                 });
         }
 
@@ -139,25 +134,18 @@ class Admin extends Component {
                             {value?.version}
                         </TableCell>
                         <TableCell>
+                            <div style={{textAlign: 'center', margin: '20px'}}>
+                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, index)}>
+                                    <ChatBubbleIcon />
+                                </Button>
+                            </div>
+                        </TableCell>
+                        <TableCell>
                             <Button variant={'contained'} color="primary" onClick={() => {
                                 window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
                             }}>
                                 <DownloadIcon />
                             </Button>
-                        </TableCell>
-                        <TableCell>
-                            <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, index)}>
-                                    編集
-                                </Button>
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.deleteEmojiPack(value.emojiPackId, value.name)} style={{backgroundColor: '#df0000'}}>
-                                    <DeleteForeverIcon />
-                                </Button>
-                            </div>
                         </TableCell>
                     </TableRow>
                 );
@@ -165,7 +153,7 @@ class Admin extends Component {
         }
 
         this.getEmojiPackList = () => {
-            axios.get(`/api/admin/emoji`)
+            axios.get(`/api/emoji`)
                 .then((response) => {
                     this.setState({data: response.data.body});
                     this.setState({isLoaded: true});
@@ -174,39 +162,12 @@ class Admin extends Component {
 
         this.getEmojiList = (emojiPackId) => {
             if(emojiPackId) {
-                axios.get("/api/admin/emoji/"+emojiPackId)
+                axios.get("/api/emoji/"+emojiPackId)
                     .then((response) => {
                         this.setState({emojis: response.data.body?.emojis ?? []});
                     });
             }
         }
-
-        this.execUpdate = (id) => {
-            if (window.confirm('更新してもよろしいですか？')) {
-                this.setState({isLoaded: false});
-                axios.post(`/api/admin/emoji/${id}`, this.state.editEmojiPack)
-                    .then(() => {
-
-                    })
-                    .catch((error) => {
-                        let responseData = error.response.data;
-                        alert("登録に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
-                    })
-                    .finally(() => {
-                        this.getEmojiPackList();
-                    });
-            }
-        }
-
-        this.deleteEmojiPack = ((id, name) => {
-            if (window.confirm('絵文字パック "' + name + '" を削除しますか？')) {
-                this.setState({isLoaded: false});
-                axios.delete(`/api/admin/emoji/${id}`)
-                    .then(() => {
-                        this.getEmojiPackList();
-                    });
-            }
-        });
     }
 
     componentDidMount() {
@@ -228,20 +189,6 @@ class Admin extends Component {
                         <Typography variant="h6" style={{padding: '10px'}}>
                             {this.props.siteTitle}
                         </Typography>
-                        <Typography variant="h6" style={{
-                            padding: '10px',
-                            position: 'absolute',
-                            right: 0,
-                            top: '-4px'
-                        }}>
-                        <a className="dropdown-item" href="/admin/logout" style={{color: '#fff'}}
-                           onClick={() => {
-                               event.preventDefault();
-                               document.getElementById('logout-form').submit()
-                           }}>
-                            ログアウト
-                        </a>
-                        </Typography>
                     </AppBar>
                 </div>
                 <TableContainer id={'tableRoot'} component={Paper} style={{position: 'relative', width: '80vw', margin: 'auto', marginTop: '60px'}}>
@@ -251,9 +198,8 @@ class Admin extends Component {
                                 <TableCell></TableCell>
                                 <TableCell>絵文字パック名</TableCell>
                                 <TableCell>バージョン</TableCell>
+                                <TableCell>詳細</TableCell>
                                 <TableCell>インストール</TableCell>
-                                <TableCell>編集</TableCell>
-                                <TableCell>削除</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -264,15 +210,12 @@ class Admin extends Component {
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <NewEmojiPackDialog handleOpen={this.handleNewEmojiPackDialogOpen} open={this.state.isNewEmojiPackDialogOpen} handleChange={this.newEmojiPackChangeValue} newEmojiPack={this.state.newEmojiPack} execRegister={this.execRegister}/>
-                </div>
-                <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackManageDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} />
+                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} />
                 </div>
             </>
         );
     }
 }
 
-export default Admin;
+export default EmojiRepo;
 
