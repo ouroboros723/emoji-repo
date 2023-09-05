@@ -20,13 +20,16 @@ trait ApiResponseTrait
      * @param  string       $message
      * @return JsonResponse
      */
-    public function sendResponse($result, $message = ''): JsonResponse
+    public function sendResponse($result, $message = '', $code = 200, bool $success = null): JsonResponse
     {
-        return Response::json([
-                'success' => true,
+        return Response::json(
+            [
+                'success' => is_null($success) ? (int) $code === 200 : $success,
                 'body'    => $result,
                 'message' => $message,
-            ]);
+            ],
+            $code
+        );
     }
 
     /**
