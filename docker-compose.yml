@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: ./infra/docker/nginx/Dockerfile
     ports:
-      - ${WEB_PORT:-80}:80
+      - ${HOST_WEB_PORT:-80}:80
     volumes:
       - php-fpm-socket:/var/run/php-fpm
       - ./:/work
@@ -37,7 +37,7 @@ services:
       context: .
       dockerfile: ./infra/docker/mysql/Dockerfile
     ports:
-      - ${DB_PORT:-3306}:3306
+      - ${HOST_DB_PORT:-3306}:3306
     volumes:
       - db-store:/var/lib/mysql
       - ./infra/dbBackup:/dbBackup
@@ -50,5 +50,5 @@ services:
   mailhog:
     image: mailhog/mailhog
     ports:
-      - 8025:8025
-      - 1025:1025
+      - ${HOST_MAILHOG_WEB_PORT:-8025}:8025
+      - ${HOST_MAIL_PORT:-1025}:1025
