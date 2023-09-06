@@ -147,7 +147,6 @@ class EmojiRepo extends Component {
                             checkSuccess: true,
                             isStatusLoaded: true
                         };
-                        console.log(emojiPackStatus);
                         this.setState({emojiPackStatus: emojiPackStatus});
                     } else {
                         emojiPackStatus[emojiPackId] = response.data;
@@ -156,7 +155,6 @@ class EmojiRepo extends Component {
                             checkSuccess: true,
                             isStatusLoaded: true
                         }
-                        console.log(emojiPackStatus);
                         this.setState({emojiPackStatus: emojiPackStatus});
                     }
                 })
@@ -178,7 +176,6 @@ class EmojiRepo extends Component {
                             checkSuccess: true,
                             isStatusLoaded: true
                         };
-                        console.log(emojiPackStatus);
                         this.setState({emojiPackStatus: emojiPackStatus});
                     } else {
                         let emojiPackStatus = this.state.emojiPackStatus;
@@ -187,7 +184,6 @@ class EmojiRepo extends Component {
                             checkSuccess: false,
                             isStatusLoaded: true
                         }
-                        console.log(emojiPackStatus);
                         this.setState({emojiPackStatus: emojiPackStatus});
                         console.error('EmojiPackStatus: '+emojiPackId+' get status failed.');
                     }
@@ -235,7 +231,7 @@ class EmojiRepo extends Component {
                             </div>
                         </TableCell>
                         <TableCell>
-                            <Button variant={'contained'} color="primary" onClick={() => {
+                            <Button disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false} variant={'contained'} color="primary" onClick={() => {
                                 window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
                             }}>
                                 <DownloadIcon />
@@ -309,7 +305,7 @@ class EmojiRepo extends Component {
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} />
+                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} emojiPackStatus={this.state.emojiPackStatus} />
                 </div>
             </>
         );

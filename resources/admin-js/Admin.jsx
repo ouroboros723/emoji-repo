@@ -166,7 +166,7 @@ class Admin extends Component {
                             {value?.version}
                         </TableCell>
                         <TableCell>
-                            <Button variant={'contained'} color="primary" onClick={() => {
+                            <Button disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false} variant={'contained'} color="primary" onClick={() => {
                                 window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
                             }}>
                                 <DownloadIcon />
@@ -259,7 +259,7 @@ class Admin extends Component {
                             checkSuccess: true,
                             isStatusLoaded: true
                         };
-                        console.log(emojiPackStatus);
+
                         this.setState({emojiPackStatus: emojiPackStatus});
                     } else {
                         emojiPackStatus[emojiPackId] = response.data;
@@ -268,12 +268,12 @@ class Admin extends Component {
                             checkSuccess: true,
                             isStatusLoaded: true
                         }
-                        console.log(emojiPackStatus);
+
                         this.setState({emojiPackStatus: emojiPackStatus});
                     }
                 })
                 .catch((error) => {
-                    if(error.code == 502) {
+                    if(error.response.status === 502) {
                         let emojiPackStatus = this.state.emojiPackStatus;
                         emojiPackStatus[emojiPackId] = {
                             body:
@@ -290,7 +290,7 @@ class Admin extends Component {
                             checkSuccess: true,
                             isStatusLoaded: true
                         };
-                        console.log(emojiPackStatus);
+
                         this.setState({emojiPackStatus: emojiPackStatus});
                     } else {
                         let emojiPackStatus = this.state.emojiPackStatus;
@@ -299,7 +299,7 @@ class Admin extends Component {
                             checkSuccess: false,
                             isStatusLoaded: true
                         }
-                        console.log(emojiPackStatus);
+
                         this.setState({emojiPackStatus: emojiPackStatus});
                         console.error('EmojiPackStatus: '+emojiPackId+' get status failed.');
                     }
@@ -366,7 +366,7 @@ class Admin extends Component {
                     <NewEmojiPackDialog handleOpen={this.handleNewEmojiPackDialogOpen} open={this.state.isNewEmojiPackDialogOpen} handleChange={this.newEmojiPackChangeValue} newEmojiPack={this.state.newEmojiPack} execRegister={this.execRegister}/>
                 </div>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackManageDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} />
+                    <EmojiPackManageDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} execUpdate={this.execUpdate} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} emojiPackStatus={this.state.emojiPackStatus} />
                 </div>
             </>
         );
