@@ -16,6 +16,9 @@ import CommentShow from "../admin-js/components/CommentShow";
 import DownloadIcon from '@mui/icons-material/Download';
 import EmojiPackShowDialog from "./components/EmojiPackShowDialog";
 import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
+import WarningIcon from '@mui/icons-material/Warning';
+import DangerousIcon from '@mui/icons-material/Dangerous';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 class EmojiRepo extends Component {
     constructor(props) {
@@ -41,7 +44,11 @@ class EmojiRepo extends Component {
             },
             newEmojiPack: {
                 sourceUrl: '',
-            }
+            },
+            emojiPackStatus: {
+                body: {},
+                isStatusLoaded: false,
+            },
         }
 
         this.overlayWidth = '100%';
@@ -120,10 +127,93 @@ class EmojiRepo extends Component {
                 });
         }
 
+        this.checkEmojiPack = (emojiPackId) => {
+            axios.get(`/api/emoji/check/`+emojiPackId)
+                .then((response)=> {
+                    let emojiPackStatus = this.state.emojiPackStatus;
+                    if(response.data?.exception === 'ErrorException') {
+                        emojiPackStatus[emojiPackId] = {
+                            body:
+                                {
+                                    errors:
+                                        [
+                                            {
+                                                success: 'false',
+                                                message: 'access_failed',
+                                            }
+                                        ],
+                                    warnings: [],
+                                },
+                            checkSuccess: true,
+                            isStatusLoaded: true
+                        };
+                        this.setState({emojiPackStatus: emojiPackStatus});
+                    } else {
+                        emojiPackStatus[emojiPackId] = response.data;
+                        emojiPackStatus[emojiPackId] = {
+                            ...emojiPackStatus[emojiPackId],
+                            checkSuccess: true,
+                            isStatusLoaded: true
+                        }
+                        this.setState({emojiPackStatus: emojiPackStatus});
+                    }
+                })
+                .catch((error) => {
+                    if(error.response.status === 502) {
+                        let emojiPackStatus = this.state.emojiPackStatus;
+                        emojiPackStatus[emojiPackId] = {
+                            body:
+                                {
+                                    errors:
+                                        [
+                                            {
+                                                success: 'false',
+                                                message: 'access_failed',
+                                            }
+                                        ],
+                                    warnings: [],
+                                },
+                            checkSuccess: true,
+                            isStatusLoaded: true
+                        };
+                        this.setState({emojiPackStatus: emojiPackStatus});
+                    } else {
+                        let emojiPackStatus = this.state.emojiPackStatus;
+                        emojiPackStatus[emojiPackId] = {
+                            ...emojiPackStatus[emojiPackId],
+                            checkSuccess: false,
+                            isStatusLoaded: true
+                        }
+                        this.setState({emojiPackStatus: emojiPackStatus});
+                        console.error('EmojiPackStatus: '+emojiPackId+' get status failed.');
+                    }
+                });
+        }
+
         this.makeList = () => {
             return this.state.data.map((value, index) => {
+                const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
+                const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
                 return (
                     <TableRow>
+                        <TableCell style={{minWidth: '120px'}}>
+                            {
+                                this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
+                                    (
+                                        this.state.emojiPackStatus?.[value?.emojiPackId]?.checkSuccess ?
+                                            (
+                                                (errorLength > 0 ) ?
+                                                    <DangerousIcon style={{color: 'red'}} /> :
+                                                    (
+                                                        (warningLength > 0) ?
+                                                            <WarningIcon style={{color: '#ffa700'}} /> : <CheckCircleIcon style={{color: 'green'}} />
+                                                    )
+                                            )
+                                            : <WarningIcon style={{color: 'gray'}} />
+                                    )
+                                : <CircularProgress />
+                            }
+                        </TableCell>
                         <TableCell style={{minWidth: '120px'}}>
                             <img style={{width: '50px'}} src={value?.iconUrl} />
                         </TableCell>
@@ -141,7 +231,7 @@ class EmojiRepo extends Component {
                             </div>
                         </TableCell>
                         <TableCell>
-                            <Button variant={'contained'} color="primary" onClick={() => {
+                            <Button disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false} variant={'contained'} color="primary" onClick={() => {
                                 window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
                             }}>
                                 <DownloadIcon />
@@ -157,6 +247,10 @@ class EmojiRepo extends Component {
                 .then((response) => {
                     this.setState({data: response.data.body});
                     this.setState({isLoaded: true});
+
+                    response.data.body.map((value, index) => {
+                        this.checkEmojiPack(value?.emojiPackId);
+                    });
                 });
         }
 
@@ -196,6 +290,7 @@ class EmojiRepo extends Component {
                         <TableHead>
                             <TableRow >
                                 <TableCell></TableCell>
+                                <TableCell></TableCell>
                                 <TableCell>絵文字パック名</TableCell>
                                 <TableCell>バージョン</TableCell>
                                 <TableCell>詳細</TableCell>
@@ -210,7 +305,7 @@ class EmojiRepo extends Component {
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} />
+                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} emojiPackStatus={this.state.emojiPackStatus} />
                 </div>
             </>
         );

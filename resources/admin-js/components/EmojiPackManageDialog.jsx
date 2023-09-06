@@ -53,7 +53,7 @@ export default function EmojiPackManageDialog(props) {
     const showEmojiList = () => {
         if(props.emojis) {
             return props.emojis.map((value, index) => {
-                console.log(value);
+
                 return (
                     <img alt={value?.shortcode} title={':'+value?.shortcode+':'} src={value.imageURL} style={{height: '30px'}} loading="lazy"></img>
                 );
@@ -74,11 +74,103 @@ export default function EmojiPackManageDialog(props) {
         handleClose();
     }
 
+
+    const getErrors = (errors) => {
+        return Object.keys(errors).map((key) => {
+            return (
+                <>
+                    {
+                        (errors[key]?.emptyShortCode !== null && errors[key]?.emptyShortCode !== undefined) ?
+                            <li>
+                                <span>ショートコードがありません。</span>
+                                <img alt={'count: '+key} title={'count: '+key} src={errors[key]?.emptyShortCode?.imageURL} style={{height: '30px'}}></img>
+                            </li>
+                            :  null
+                    }
+                    {
+                        (errors[key]?.emptyImageUrl !== null && errors[key]?.emptyImageUrl !== undefined) ?
+                            <li>
+                                <span>絵文字URLがありません。</span>
+                                <div>{':'+errors[key]?.emptyImageUrl?.shortcode+':'}</div>
+
+                            </li>
+                            : null
+                    }
+                    {
+                        (errors[key]?.emptyImageUrl !== null && errors[key]?.emptyImageUrl !== undefined) ?
+                            <li>
+                                <span>絵文字URLが不正です。</span>
+                                <div>{':'+errors[key]?.emptyImageUrl?.shortcode+':'}</div>
+
+                            </li>
+                            : null
+                    }
+                </>
+            );
+        });
+    }
+
+    const getWarnings = (warnings) => {
+        return Object.keys(warnings).map((key) => {
+
+            return (
+                <>
+                    {
+                        (warnings[key]?.invalidShortCode !== null && warnings[key]?.invalidShortCode !== undefined) ?
+                            <li>
+                                <span>一部のSNSで絵文字が正しく表示されない可能性があります。</span>
+                                <div>
+                                    <img alt={'count: '+key} title={'count: '+key} src={warnings[key].invalidShortCode?.imageURL} style={{height: '30px', margin: '0 5px 0 0'}}></img>
+                                    <span>{':'+warnings[key]?.invalidShortCode?.shortcode+':'}</span>
+                                </div>
+                            </li>
+                            :  null
+                    }
+                </>
+            );
+        });
+    }
+
+    const warnings = props.emojiPackStatus?.[props.emojiPack?.emojiPackId]?.body?.warnings ?? {};
+    const errors = props.emojiPackStatus?.[props.emojiPack?.emojiPackId]?.body?.errors ?? {};
+    const warningLength = Object.keys(warnings)?.length;
+    const errorLength = Object.keys(errors)?.length;
+
     return (
         <div>
             <Dialog open={props.open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">絵文字パック編集</DialogTitle>
                 <DialogContent>
+                    {
+                        (errorLength > 0) ?
+                            <div id={'emojiPackErrors'} style={{
+                                width: '100%',
+                                margin: '10px 0',
+                                padding: '5px',
+                                backgroundColor: '#ffcbcb'
+                            }}>
+                                <div><b>エラー</b></div>
+                                <span>この絵文字パックには次の問題があります。</span>
+                                {
+                                    errors?.[0]?.message === 'access_failed' ? <li>絵文字メタデータにアクセス出来ません。</li> : null
+                                }
+                                {getErrors(errors)}
+                            </div>
+                            : null
+                    }
+                    {
+                        (warningLength > 0) ?
+                            <div id={'emojiPackWarnings'} style={{
+                                width: '100%',
+                                margin: '10px 0',
+                                padding: '5px',
+                                backgroundColor: '#ffe9a4'
+                            }}>
+                                <div><b>互換性の問題</b></div>
+                                {getWarnings(warnings)}
+                            </div>
+                            : null
+                    }
                     <div id={'detailEmojiPackIconArea'} style={{
                         width: '100%',
                         margin: '10px 0'
@@ -140,7 +232,7 @@ export default function EmojiPackManageDialog(props) {
                     </div>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant={'contained'} color="primary" style={{position: 'absolute', left: '10px'}} onClick={() => {
+                    <Button disabled={errorLength > 0} variant={'contained'} color="primary" style={{position: 'absolute', left: '10px'}} onClick={() => {
                         window.open(props?.concurrentRedirectUrl+props.emojiPack?.sourceUrl, '_blank');
                     }}>
                         <DownloadIcon /> インストール
@@ -164,6 +256,7 @@ EmojiPackManageDialog.propTypes = {
     execUpdate: PropTypes.func,
     concurrentRedirectUrl: PropTypes.string,
     emojis: PropTypes.array.isRequired,
+    emojiPackStatus: PropTypes.object,
     emojiPack: PropTypes.shape({
         emojiPackId: PropTypes.number,
         sourceUrl: PropTypes.string,

@@ -19,9 +19,9 @@ class EmojiPackController extends BaseController
      */
     public function getList(): JsonResponse
     {
-        $EmojiPack = EmojiPack::orderByDesc('emoji_pack_id')->get();
+        $EmojiPacks = EmojiPack::orderByDesc('emoji_pack_id')->get();
 
-        return $this->sendResponse(array_key_camel($EmojiPack->toArray()));
+        return $this->sendResponse(array_key_camel($EmojiPacks->toArray()));
     }
 
     /**
