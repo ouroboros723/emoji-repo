@@ -17,6 +17,18 @@
     <meta name="apple-mobile-web-app-title" content="bagelee"/>
     <link rel="apple-touch-icon" href="{{asset('/img/common/app-icon.png')}}" sizes="144x144"/>
 {{--    <link rel="manifest" href="/js/manifest.json"/>--}}
+
+    @if(!is_null(\Config::get('app.google_analytics.gtag')))
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{Config::get('app.gtag')}}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', '{{Config::get('app.google_analytics.gtag')}}');
+        </script>
+    @endif
 </head>
 <body>
 <div id="root" data-props='{"siteTitle": "{{Config::get('app.name')}}", "concurrentRedirectUrl": "{!!Config::get('app.concurrent_redirect_url')!!}"}'>

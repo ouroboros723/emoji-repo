@@ -230,5 +230,7 @@ return [
     ],
 
     'concurrent_redirect_url' => env('CONCURRENT_REDIRECT_URL'),
-
+    'google_analytics' => [
+        'gtag' => env('ANALYTICS_GTAG'),
+    ],
 ];
