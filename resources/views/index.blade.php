@@ -18,9 +18,9 @@
     <link rel="apple-touch-icon" href="{{asset('/img/common/app-icon.png')}}" sizes="144x144"/>
 {{--    <link rel="manifest" href="/js/manifest.json"/>--}}
 
-    @if(!is_null(\Config::get('app.google_analytics.gtag')))
+    @if(!empty(Config::get('app.google_analytics.gtag')))
         <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id={{Config::get('app.gtag')}}"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{Config::get('app.google_analytics.gtag')}}"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
