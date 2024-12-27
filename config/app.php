@@ -230,6 +230,7 @@ return [
     ],
 
     'concurrent_redirect_url' => env('CONCURRENT_REDIRECT_URL'),
+    'admin_concrnt_url' => env('ADMIN_CONCRNT_URL'),
     'google_analytics' => [
         'gtag' => env('ANALYTICS_GTAG'),
     ],
