@@ -19,6 +19,7 @@ import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 import WarningIcon from '@mui/icons-material/Warning';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import NewEmojiPackDialog from "./components/NewEmojiPackDialog";
 
 class EmojiRepo extends Component {
     constructor(props) {
@@ -122,8 +123,13 @@ class EmojiRepo extends Component {
                     }
                     this.setState({newEmojiPack: newEmojiPack});
                 })
-                .catch(() => {
-                    alert('登録に失敗しました。時間をおいてお試しください。');
+                .catch((error) => {
+                    let responseData = error.response.data;
+                    if(responseData.message === 'already_registered') {
+                        alert('この絵文字パックは既に登録されています。');
+                    } else {
+                        alert("登録に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
+                    }
                 });
         }
 
@@ -285,10 +291,11 @@ class EmojiRepo extends Component {
                         </Typography>
                     </AppBar>
                 </div>
-                <TableContainer id={'tableRoot'} component={Paper} style={{position: 'relative', width: '80vw', margin: 'auto', marginTop: '60px'}}>
+                <TableContainer id={'tableRoot'} component={Paper}
+                                style={{position: 'relative', width: '80vw', margin: 'auto', marginTop: '60px'}}>
                     <Table id={'tableBody'} style={{width: '100%', minHeight: '120px'}}>
                         <TableHead>
-                            <TableRow >
+                            <TableRow>
                                 <TableCell></TableCell>
                                 <TableCell></TableCell>
                                 <TableCell>絵文字パック名</TableCell>
@@ -301,11 +308,31 @@ class EmojiRepo extends Component {
                             {this.makeList()}
                         </TableBody>
                     </Table>
-                    {this.state.isLoaded ? null : <div id={'circularRoot'} style={{position: 'absolute', width: this.overlayWidth, height: '100%', textAlign: 'center', backgroundColor: 'rgb(127 127 127 / 51%)', 'bottom': '0'}}><CircularProgress style={{position: 'absolute', top: '38%', transform: 'translate(0, -50%)'}} />
+                    {this.state.isLoaded ? null : <div id={'circularRoot'} style={{
+                        position: 'absolute',
+                        width: this.overlayWidth,
+                        height: '100%',
+                        textAlign: 'center',
+                        backgroundColor: 'rgb(127 127 127 / 51%)',
+                        'bottom': '0'
+                    }}><CircularProgress style={{position: 'absolute', top: '38%', transform: 'translate(0, -50%)'}}/>
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
-                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen} handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack} emojis={this.state.emojis} handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)} concurrentRedirectUrl={this.props?.concurrentRedirectUrl} emojiPackStatus={this.state.emojiPackStatus} />
+                    <NewEmojiPackDialog handleOpen={this.handleNewEmojiPackDialogOpen}
+                                        open={this.state.isNewEmojiPackDialogOpen}
+                                        handleChange={this.newEmojiPackChangeValue}
+                                        newEmojiPack={this.state.newEmojiPack} execRegister={this.execRegister}
+                                        adminConcrntUrl={this.props?.adminConcrntUrl}
+                    />
+                </div>
+                <div style={{textAlign: 'center', margin: '20px'}}>
+                    <EmojiPackShowDialog open={this.state.isEmojiPackDialogOpen}
+                                         handleChange={this.emojiPackChangeValue} emojiPack={this.state.editEmojiPack}
+                                         emojis={this.state.emojis}
+                                         handleOpen={(open) => this.handleEmojiPackManageDialogOpen(open, null)}
+                                         concurrentRedirectUrl={this.props?.concurrentRedirectUrl}
+                                         emojiPackStatus={this.state.emojiPackStatus}/>
                 </div>
             </>
         );

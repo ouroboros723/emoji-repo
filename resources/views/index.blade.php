@@ -31,7 +31,7 @@
     @endif
 </head>
 <body>
-<div id="root" data-props='{"siteTitle": "{{Config::get('app.name')}}", "concurrentRedirectUrl": "{!!Config::get('app.concurrent_redirect_url')!!}"}'>
+<div id="root" data-props='{"siteTitle": "{{Config::get('app.name')}}", "concurrentRedirectUrl": "{!!Config::get('app.concurrent_redirect_url')!!}", "adminConcrntUrl": "{!!Config::get('app.admin_concrnt_url')!!}"}'>
     {{--    @include('admin.parts.common.loading-spinner')--}}
 </div>
 <script src="https://cdn.geolonia.com/community-geocoder.js"></script>

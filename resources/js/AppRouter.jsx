@@ -19,7 +19,7 @@ class AppRouter extends Component {
         return (
                 <Router>
                     <Route exact path='/'>
-                        <Title title={this.props.siteTitle}><EmojiRepo siteTitle={this.props.siteTitle} concurrentRedirectUrl={this.props.concurrentRedirectUrl} /></Title>
+                        <Title title={this.props.siteTitle}><EmojiRepo siteTitle={this.props.siteTitle} concurrentRedirectUrl={this.props.concurrentRedirectUrl} adminConcrntUrl={this.props?.adminConcrntUrl}/></Title>
                     </Route>
                 </Router>
             );
