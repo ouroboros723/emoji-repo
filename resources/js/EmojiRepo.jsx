@@ -9,7 +9,8 @@ import {
     TableCell,
     TableContainer,
     TableHead,
-    TableRow, Typography
+    TableRow, Typography,
+    TextField
 } from "@material-ui/core";
 import axios from "axios";
 import CommentShow from "../admin-js/components/CommentShow";
@@ -50,6 +51,7 @@ class EmojiRepo extends Component {
                 body: {},
                 isStatusLoaded: false,
             },
+            searchTerm: '',
         }
 
         this.overlayWidth = '100%';
@@ -101,6 +103,10 @@ class EmojiRepo extends Component {
             newEmojiPack[e.target.name] = e.target.value;
             this.setState({newEmojiPack: newEmojiPack});
         }
+
+        this.handleSearchChange = (event) => {
+            this.setState({ searchTerm: event.target.value });
+        };
 
         // this.emojiPackChangeValue = (e) => {
         //     let emojiPack = this.state.editEmojiPack;
@@ -197,11 +203,33 @@ class EmojiRepo extends Component {
         }
 
         this.makeList = () => {
-            return this.state.data.map((value, index) => {
+            const filteredData = this.state.data.filter(item => {
+                if (this.state.searchTerm === "") return true;
+                const searchTermLower = this.state.searchTerm.toLowerCase();
+                return (
+                    item.name?.toLowerCase().includes(searchTermLower) ||
+                    item.characterName?.toLowerCase().includes(searchTermLower) ||
+                    item.lineName?.toLowerCase().includes(searchTermLower) ||
+                    item.comment?.toLowerCase().includes(searchTermLower)
+                );
+            });
+            return filteredData.map((value, index) => {
                 const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
                 const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
+                // Adjust index to original index if needed for certain operations, but for rendering, sequential index is fine.
+                // For functions like handleEmojiPackManageDialogOpen, we might need to find original index if filteredData is used directly
+                // However, the current implementation of handleEmojiPackManageDialogOpen uses the index from the original data array if it's not modified.
+                // Let's assume for now that the index passed to dialog openers refers to the position in the *original* data array.
+                // This means we might need to adjust how `index` is used if `handleEmojiPackManageDialogOpen` expects an index from the original `this.state.data`.
+                // For now, we'll use the filtered index. If issues arise, we'll revise.
+                // A safer way would be to pass `value.emojiPackId` or the `value` object itself to handlers.
+                // The current `handleEmojiPackManageDialogOpen(true, index)` expects index from this.state.data.
+                // So, we should find the original index or pass the item directly.
+                // Let's find the original index:
+                const originalIndex = this.state.data.findIndex(originalItem => originalItem.emojiPackId === value.emojiPackId);
+
                 return (
-                    <TableRow>
+                    <TableRow key={value.emojiPackId}> {/* Added key for stability */}
                         <TableCell style={{minWidth: '120px'}}>
                             {
                                 this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
@@ -231,7 +259,7 @@ class EmojiRepo extends Component {
                         </TableCell>
                         <TableCell>
                             <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, index)}>
+                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
                                     <ChatBubbleIcon />
                                 </Button>
                             </div>
@@ -293,6 +321,13 @@ class EmojiRepo extends Component {
                 </div>
                 <TableContainer id={'tableRoot'} component={Paper}
                                 style={{position: 'relative', width: '80vw', margin: 'auto', marginTop: '60px'}}>
+                    <TextField
+                        label="絵文字パック名を検索"
+                        variant="outlined"
+                        style={{ margin: "20px", width: "calc(100% - 40px)" }}
+                        value={this.state.searchTerm}
+                        onChange={this.handleSearchChange}
+                    />
                     <Table id={'tableBody'} style={{width: '100%', minHeight: '120px'}}>
                         <TableHead>
                             <TableRow>
