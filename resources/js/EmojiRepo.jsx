@@ -12,6 +12,7 @@ import {
     TableRow, Typography,
     TextField
 } from "@material-ui/core";
+import { FixedSizeList } from 'react-window';
 import axios from "axios";
 import CommentShow from "../admin-js/components/CommentShow";
 import DownloadIcon from '@mui/icons-material/Download';
@@ -57,6 +58,64 @@ class EmojiRepo extends Component {
         this.overlayWidth = '100%';
 
         this.title = this.props.siteTitle;
+
+        this.Row = ({ index, style }) => {
+            const filteredData = this.getFilteredData(); // Use getFilteredData here
+            const value = filteredData[index];
+            // If value is undefined (e.g., list is empty or index is out of bounds), render nothing or a placeholder
+            if (!value) {
+                return null; 
+            }
+            const originalIndex = this.state.data.findIndex(originalItem => originalItem.emojiPackId === value.emojiPackId);
+            const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
+            const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
+
+            return (
+                <TableRow key={value.emojiPackId} style={style} component="div">
+                    <TableCell style={{minWidth: '120px'}} component="div">
+                        {
+                            this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
+                                (
+                                    this.state.emojiPackStatus?.[value?.emojiPackId]?.checkSuccess ?
+                                        (
+                                            (errorLength > 0 ) ?
+                                                <DangerousIcon style={{color: 'red'}} /> :
+                                                (
+                                                    (warningLength > 0) ?
+                                                        <WarningIcon style={{color: '#ffa700'}} /> : <CheckCircleIcon style={{color: 'green'}} />
+                                                )
+                                        )
+                                        : <WarningIcon style={{color: 'gray'}} />
+                                )
+                            : <CircularProgress size={24} /> // Adjusted size for better fit
+                        }
+                    </TableCell>
+                    <TableCell style={{minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center'}} component="div">
+                        <img style={{width: '50px', height: '50px', objectFit: 'contain'}} src={value?.iconUrl} /> {/* Added height and objectFit */}
+                    </TableCell>
+                    <TableCell style={{minWidth: '120px', display: 'flex', alignItems: 'center'}} component="div"> {/* Removed justifyContent */}
+                        {value?.name}
+                    </TableCell>
+                    <TableCell style={{display: 'flex', alignItems: 'center'}} component="div"> {/* Removed justifyContent */}
+                        {value?.version}
+                    </TableCell>
+                    <TableCell style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}} component="div">
+                        <div style={{textAlign: 'center', margin: '0px'}}>
+                            <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
+                                <ChatBubbleIcon />
+                            </Button>
+                        </div>
+                    </TableCell>
+                    <TableCell style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}} component="div">
+                        <Button disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false} variant={'contained'} color="primary" onClick={() => {
+                            window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
+                        }}>
+                            <DownloadIcon />
+                        </Button>
+                    </TableCell>
+                </TableRow>
+            );
+        };
 
         const yenFormatter = new Intl.NumberFormat('ja-JP', {
             style: 'currency',
@@ -202,8 +261,10 @@ class EmojiRepo extends Component {
                 });
         }
 
-        this.makeList = () => {
-            const filteredData = this.state.data.filter(item => {
+        // this.makeList can be removed or modified if Row component handles all rendering logic.
+        // For now, let's keep it to get filteredData, but it won't render directly.
+        this.getFilteredData = () => {
+            return this.state.data.filter(item => {
                 if (this.state.searchTerm === "") return true;
                 const searchTermLower = this.state.searchTerm.toLowerCase();
                 return (
@@ -211,67 +272,6 @@ class EmojiRepo extends Component {
                     item.characterName?.toLowerCase().includes(searchTermLower) ||
                     item.lineName?.toLowerCase().includes(searchTermLower) ||
                     item.comment?.toLowerCase().includes(searchTermLower)
-                );
-            });
-            return filteredData.map((value, index) => {
-                const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
-                const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
-                // Adjust index to original index if needed for certain operations, but for rendering, sequential index is fine.
-                // For functions like handleEmojiPackManageDialogOpen, we might need to find original index if filteredData is used directly
-                // However, the current implementation of handleEmojiPackManageDialogOpen uses the index from the original data array if it's not modified.
-                // Let's assume for now that the index passed to dialog openers refers to the position in the *original* data array.
-                // This means we might need to adjust how `index` is used if `handleEmojiPackManageDialogOpen` expects an index from the original `this.state.data`.
-                // For now, we'll use the filtered index. If issues arise, we'll revise.
-                // A safer way would be to pass `value.emojiPackId` or the `value` object itself to handlers.
-                // The current `handleEmojiPackManageDialogOpen(true, index)` expects index from this.state.data.
-                // So, we should find the original index or pass the item directly.
-                // Let's find the original index:
-                const originalIndex = this.state.data.findIndex(originalItem => originalItem.emojiPackId === value.emojiPackId);
-
-                return (
-                    <TableRow key={value.emojiPackId}> {/* Added key for stability */}
-                        <TableCell style={{minWidth: '120px'}}>
-                            {
-                                this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
-                                    (
-                                        this.state.emojiPackStatus?.[value?.emojiPackId]?.checkSuccess ?
-                                            (
-                                                (errorLength > 0 ) ?
-                                                    <DangerousIcon style={{color: 'red'}} /> :
-                                                    (
-                                                        (warningLength > 0) ?
-                                                            <WarningIcon style={{color: '#ffa700'}} /> : <CheckCircleIcon style={{color: 'green'}} />
-                                                    )
-                                            )
-                                            : <WarningIcon style={{color: 'gray'}} />
-                                    )
-                                : <CircularProgress />
-                            }
-                        </TableCell>
-                        <TableCell style={{minWidth: '120px'}}>
-                            <img style={{width: '50px'}} src={value?.iconUrl} />
-                        </TableCell>
-                        <TableCell style={{minWidth: '120px'}}>
-                            {value?.name}
-                        </TableCell>
-                        <TableCell>
-                            {value?.version}
-                        </TableCell>
-                        <TableCell>
-                            <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
-                                    <ChatBubbleIcon />
-                                </Button>
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <Button disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false} variant={'contained'} color="primary" onClick={() => {
-                                window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
-                            }}>
-                                <DownloadIcon />
-                            </Button>
-                        </TableCell>
-                    </TableRow>
                 );
             });
         }
@@ -310,6 +310,7 @@ class EmojiRepo extends Component {
 
     render() {
         this.overlayWidth = document.querySelector('#tableBody')?.scrollWidth ? document.querySelector('#tableBody')?.scrollWidth+'px' : '100%';
+        const filteredData = this.getFilteredData();
         return (
             <>
                 <div style={{flexGrow: 1}}>
@@ -328,21 +329,43 @@ class EmojiRepo extends Component {
                         value={this.state.searchTerm}
                         onChange={this.handleSearchChange}
                     />
-                    <Table id={'tableBody'} style={{width: '100%', minHeight: '120px'}}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell></TableCell>
-                                <TableCell></TableCell>
-                                <TableCell>絵文字パック名</TableCell>
-                                <TableCell>バージョン</TableCell>
-                                <TableCell>詳細</TableCell>
-                                <TableCell>インストール</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {this.makeList()}
-                        </TableBody>
-                    </Table>
+                    {/* Outer container for the table, including FixedSizeList area */}
+                    <TableContainer component={Paper} style={{ width: '100%', margin: 'auto' }}>
+                        <Table id={'tableBody'} style={{width: '100%'}} component="div">
+                            <TableHead component="div">
+                                <TableRow component="div" style={{display: 'flex', width: '100%'}}>
+                                    <TableCell component="div" style={{minWidth: '120px', flex: '0 0 120px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>状態</TableCell> {/* Status */}
+                                    <TableCell component="div" style={{minWidth: '120px', flex: '0 0 120px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>アイコン</TableCell> {/* Icon */}
+                                    <TableCell component="div" style={{minWidth: '120px', flex: 1, display: 'flex', alignItems: 'center'}}>絵文字パック名</TableCell> {/* Name */}
+                                    <TableCell component="div" style={{flex: '0 0 100px', display: 'flex', alignItems: 'center'}}>バージョン</TableCell> {/* Version */}
+                                    <TableCell component="div" style={{flex: '0 0 100px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>詳細</TableCell> {/* Details */}
+                                    <TableCell component="div" style={{flex: '0 0 100px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>インストール</TableCell> {/* Install */}
+                                </TableRow>
+                            </TableHead>
+                            {/* TableBody now effectively replaced by FixedSizeList */}
+                            {/* The height for FixedSizeList needs to be explicitly set. */}
+                            {/* Let's use a container for FixedSizeList to control its height */}
+                            <div style={{ height: 'calc(100vh - 280px)', width: '100%'}}> {/* Adjusted height calculation */}
+                                {this.state.isLoaded && filteredData.length > 0 ? (
+                                    <FixedSizeList
+                                        height={Math.max(0, window.innerHeight - 280)} // Ensure height is not negative
+                                        itemCount={filteredData.length}
+                                        itemSize={70} // Estimated row height
+                                        width={'100%'}
+                                        overscanCount={5} // Optional: render a few more items to reduce blank areas during scroll
+                                    >
+                                        {this.Row}
+                                    </FixedSizeList>
+                                ) : (
+                                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}> {/* Centered message */}
+                                        <Typography>
+                                            {this.state.isLoaded ? '該当する絵文字パックはありません。' : ''}
+                                        </Typography>
+                                    </div>
+                                )}
+                            </div>
+                        </Table>
+                    </TableContainer>
                     {this.state.isLoaded ? null : <div id={'circularRoot'} style={{
                         position: 'absolute',
                         width: this.overlayWidth,

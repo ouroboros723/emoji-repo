@@ -12,6 +12,7 @@ import {
     TableRow, Typography,
     TextField
 } from "@material-ui/core";
+import { FixedSizeList } from 'react-window';
 import axios from "axios";
 import EmojiPackManageDialog from "./components/EmojiPackManageDialog";
 import NewEmojiPackDialog from "./components/NewEmojiPackDialog";
@@ -55,6 +56,66 @@ class Admin extends Component {
         this.overlayWidth = '100%';
 
         this.title = this.props.siteTitle;
+
+        this.Row = ({ index, style }) => {
+            const filteredData = this.getFilteredData(); // Use getFilteredData here
+            const value = filteredData[index];
+            if (!value) {
+                return null;
+            }
+            const originalIndex = this.state.data.findIndex(originalItem => originalItem.emojiPackId === value.emojiPackId);
+            const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
+            const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
+
+            return (
+                <TableRow key={value.emojiPackId} style={style} component="div">
+                    <TableCell style={{minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center'}} component="div">
+                        {
+                            this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
+                                (
+                                    this.state.emojiPackStatus?.[value?.emojiPackId]?.checkSuccess ?
+                                        (
+                                            (errorLength > 0 ) ?
+                                                <DangerousIcon style={{color: 'red'}} /> :
+                                                (
+                                                    (warningLength > 0) ?
+                                                        <WarningIcon style={{color: '#ffa700'}} /> : <CheckCircleIcon style={{color: 'green'}} />
+                                                )
+                                        )
+                                        : <WarningIcon style={{color: 'gray'}} />
+                                )
+                                : <CircularProgress size={24}/>
+                        }
+                    </TableCell>
+                    <TableCell style={{minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center'}} component="div">
+                        <img style={{width: '50px', height: '50px', objectFit: 'contain'}} src={value?.iconUrl} />
+                    </TableCell>
+                    <TableCell style={{minWidth: '120px', display: 'flex', alignItems: 'center'}} component="div">
+                        {value?.name}
+                    </TableCell>
+                    <TableCell style={{display: 'flex', alignItems: 'center'}} component="div">
+                        {value?.version}
+                    </TableCell>
+                    <TableCell style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}} component="div">
+                        <Button disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false} variant={'contained'} color="primary" onClick={() => {
+                            window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
+                        }}>
+                            <DownloadIcon />
+                        </Button>
+                    </TableCell>
+                    <TableCell style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}} component="div">
+                        <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
+                            編集
+                        </Button>
+                    </TableCell>
+                    <TableCell style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}} component="div">
+                        <Button variant={'contained'} color="primary" onClick={() => this.deleteEmojiPack(value.emojiPackId, value.name)} style={{backgroundColor: '#df0000'}}>
+                            <DeleteForeverIcon />
+                        </Button>
+                    </TableCell>
+                </TableRow>
+            );
+        };
 
         const yenFormatter = new Intl.NumberFormat('ja-JP', {
             style: 'currency',
@@ -138,73 +199,15 @@ class Admin extends Component {
                 });
         }
 
-        this.makeList = () => {
-            const filteredData = this.state.data.filter(item => {
+        this.getFilteredData = () => {
+            return this.state.data.filter(item => {
                 if (this.state.searchTerm === "") return true;
                 const searchTermLower = this.state.searchTerm.toLowerCase();
                 return (
                     item.name?.toLowerCase().includes(searchTermLower) ||
-                    item.characterName?.toLowerCase().includes(searchTermLower) ||
-                    item.lineName?.toLowerCase().includes(searchTermLower) ||
+                    item.characterName?.toLowerCase().includes(searchTermLower) || // Though these fields might not be in Admin's data
+                    item.lineName?.toLowerCase().includes(searchTermLower) ||      // they won't cause errors if undefined
                     item.comment?.toLowerCase().includes(searchTermLower)
-                );
-            });
-            return filteredData.map((value, index) => {
-                const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
-                const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
-                const originalIndex = this.state.data.findIndex(originalItem => originalItem.emojiPackId === value.emojiPackId);
-
-                return (
-                    <TableRow key={value.emojiPackId}> {/* Added key for stability */}
-                        <TableCell style={{minWidth: '120px'}}>
-                            {
-                                this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
-                                    (
-                                        this.state.emojiPackStatus?.[value?.emojiPackId]?.checkSuccess ?
-                                            (
-                                                (errorLength > 0 ) ?
-                                                    <DangerousIcon style={{color: 'red'}} /> :
-                                                    (
-                                                        (warningLength > 0) ?
-                                                            <WarningIcon style={{color: '#ffa700'}} /> : <CheckCircleIcon style={{color: 'green'}} />
-                                                    )
-                                            )
-                                            : <WarningIcon style={{color: 'gray'}} />
-                                    )
-                                    : <CircularProgress />
-                            }
-                        </TableCell>
-                        <TableCell style={{minWidth: '120px'}}>
-                            <img style={{width: '50px'}} src={value?.iconUrl} />
-                        </TableCell>
-                        <TableCell style={{minWidth: '120px'}}>
-                            {value?.name}
-                        </TableCell>
-                        <TableCell>
-                            {value?.version}
-                        </TableCell>
-                        <TableCell>
-                            <Button disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false} variant={'contained'} color="primary" onClick={() => {
-                                window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
-                            }}>
-                                <DownloadIcon />
-                            </Button>
-                        </TableCell>
-                        <TableCell>
-                            <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
-                                    編集
-                                </Button>
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.deleteEmojiPack(value.emojiPackId, value.name)} style={{backgroundColor: '#df0000'}}>
-                                    <DeleteForeverIcon />
-                                </Button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
                 );
             });
         }
@@ -337,6 +340,7 @@ class Admin extends Component {
 
     render() {
         this.overlayWidth = document.querySelector('#tableBody')?.scrollWidth ? document.querySelector('#tableBody')?.scrollWidth+'px' : '100%';
+        const filteredData = this.getFilteredData();
         return (
             <>
                 <div style={{flexGrow: 1}}>
@@ -368,22 +372,40 @@ class Admin extends Component {
                         value={this.state.searchTerm}
                         onChange={this.handleSearchChange}
                     />
-                    <Table id={'tableBody'} style={{width: '100%', minHeight: '120px'}}>
-                        <TableHead>
-                            <TableRow >
-                                <TableCell></TableCell>
-                                <TableCell></TableCell>
-                                <TableCell>絵文字パック名</TableCell>
-                                <TableCell>バージョン</TableCell>
-                                <TableCell>インストール</TableCell>
-                                <TableCell>編集</TableCell>
-                                <TableCell>削除</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {this.makeList()}
-                        </TableBody>
-                    </Table>
+                    <TableContainer component={Paper} style={{ width: '100%', margin: 'auto' }}>
+                        <Table id={'tableBody'} style={{width: '100%'}} component="div">
+                            <TableHead component="div">
+                                <TableRow component="div" style={{display: 'flex', width: '100%'}}>
+                                    <TableCell component="div" style={{minWidth: '120px', flex: '0 0 120px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>状態</TableCell>
+                                    <TableCell component="div" style={{minWidth: '120px', flex: '0 0 120px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>アイコン</TableCell>
+                                    <TableCell component="div" style={{minWidth: '120px', flex: 1, display: 'flex', alignItems: 'center'}}>絵文字パック名</TableCell>
+                                    <TableCell component="div" style={{flex: '0 0 100px', display: 'flex', alignItems: 'center'}}>バージョン</TableCell>
+                                    <TableCell component="div" style={{flex: '0 0 120px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>DL(確認用)</TableCell>
+                                    <TableCell component="div" style={{flex: '0 0 100px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>編集</TableCell>
+                                    <TableCell component="div" style={{flex: '0 0 100px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>削除</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <div style={{ height: 'calc(100vh - 280px)', width: '100%'}}>
+                                {this.state.isLoaded && filteredData.length > 0 ? (
+                                    <FixedSizeList
+                                        height={Math.max(0, window.innerHeight - 280)} // Dynamic height
+                                        itemCount={filteredData.length}
+                                        itemSize={70} // Row height
+                                        width={'100%'}
+                                        overscanCount={5}
+                                    >
+                                        {this.Row}
+                                    </FixedSizeList>
+                                ) : (
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
+                                        <Typography>
+                                            {this.state.isLoaded ? '該当する絵文字パックはありません。' : ''}
+                                        </Typography>
+                                    </div>
+                                )}
+                            </div>
+                        </Table>
+                    </TableContainer>
                     {this.state.isLoaded ? null : <div id={'circularRoot'} style={{position: 'absolute', width: this.overlayWidth, height: '100%', textAlign: 'center', backgroundColor: 'rgb(127 127 127 / 51%)', 'bottom': '0'}}><CircularProgress style={{position: 'absolute', top: '38%', transform: 'translate(0, -50%)'}} />
                     </div>}
                 </TableContainer>
