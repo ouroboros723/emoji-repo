@@ -9,7 +9,8 @@ import {
     TableCell,
     TableContainer,
     TableHead,
-    TableRow, Typography
+    TableRow, Typography,
+    TextField
 } from "@material-ui/core";
 import axios from "axios";
 import EmojiPackManageDialog from "./components/EmojiPackManageDialog";
@@ -48,6 +49,7 @@ class Admin extends Component {
                 body: {},
                 isStatusLoaded: false,
             },
+            searchTerm: '',
         }
 
         this.overlayWidth = '100%';
@@ -113,6 +115,10 @@ class Admin extends Component {
             this.setState({data: temp});
         }
 
+        this.handleSearchChange = (event) => {
+            this.setState({ searchTerm: event.target.value });
+        };
+
         this.execRegister = () => {
             axios.post(`/api/admin/emoji/add`, this.state.newEmojiPack)
                 .then(()=> {
@@ -133,11 +139,23 @@ class Admin extends Component {
         }
 
         this.makeList = () => {
-            return this.state.data.map((value, index) => {
+            const filteredData = this.state.data.filter(item => {
+                if (this.state.searchTerm === "") return true;
+                const searchTermLower = this.state.searchTerm.toLowerCase();
+                return (
+                    item.name?.toLowerCase().includes(searchTermLower) ||
+                    item.characterName?.toLowerCase().includes(searchTermLower) ||
+                    item.lineName?.toLowerCase().includes(searchTermLower) ||
+                    item.comment?.toLowerCase().includes(searchTermLower)
+                );
+            });
+            return filteredData.map((value, index) => {
                 const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
                 const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
+                const originalIndex = this.state.data.findIndex(originalItem => originalItem.emojiPackId === value.emojiPackId);
+
                 return (
-                    <TableRow>
+                    <TableRow key={value.emojiPackId}> {/* Added key for stability */}
                         <TableCell style={{minWidth: '120px'}}>
                             {
                                 this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
@@ -174,7 +192,7 @@ class Admin extends Component {
                         </TableCell>
                         <TableCell>
                             <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, index)}>
+                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
                                     編集
                                 </Button>
                             </div>
@@ -343,6 +361,13 @@ class Admin extends Component {
                     </AppBar>
                 </div>
                 <TableContainer id={'tableRoot'} component={Paper} style={{position: 'relative', width: '80vw', margin: 'auto', marginTop: '60px'}}>
+                    <TextField
+                        label="絵文字パック名を検索"
+                        variant="outlined"
+                        style={{ margin: "20px", width: "calc(100% - 40px)" }}
+                        value={this.state.searchTerm}
+                        onChange={this.handleSearchChange}
+                    />
                     <Table id={'tableBody'} style={{width: '100%', minHeight: '120px'}}>
                         <TableHead>
                             <TableRow >

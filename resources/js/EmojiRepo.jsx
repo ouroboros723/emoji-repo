@@ -322,7 +322,7 @@ class EmojiRepo extends Component {
                 <TableContainer id={'tableRoot'} component={Paper}
                                 style={{position: 'relative', width: '80vw', margin: 'auto', marginTop: '60px'}}>
                     <TextField
-                        label="Search Emoji Packs"
+                        label="絵文字パック名を検索"
                         variant="outlined"
                         style={{ margin: "20px", width: "calc(100% - 40px)" }}
                         value={this.state.searchTerm}
