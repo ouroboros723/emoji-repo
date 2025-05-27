@@ -8,7 +8,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import PropTypes from "prop-types";
 import {Avatar, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@material-ui/core";
-import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 
 export default function CommentShow(props) {
 

@@ -12,11 +12,12 @@ import {
     TableRow, Typography,
     TextField
 } from "@material-ui/core";
+import { FixedSizeList } from 'react-window';
 import axios from "axios";
 import CommentShow from "../admin-js/components/CommentShow";
 import DownloadIcon from '@mui/icons-material/Download';
 import EmojiPackShowDialog from "./components/EmojiPackShowDialog";
-import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import WarningIcon from '@mui/icons-material/Warning';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -57,6 +58,16 @@ class EmojiRepo extends Component {
         this.overlayWidth = '100%';
 
         this.title = this.props.siteTitle;
+
+        // 列幅の定義（ヘッダーとボディで同期）
+        this.columnWidths = [
+            120, // ステータス
+            120, // アイコン
+            300, // 絵文字パック名（拡大）
+            120, // バージョン
+            120, // 詳細
+            150  // インストール
+        ];
 
         const yenFormatter = new Intl.NumberFormat('ja-JP', {
             style: 'currency',
@@ -107,6 +118,191 @@ class EmojiRepo extends Component {
         this.handleSearchChange = (event) => {
             this.setState({ searchTerm: event.target.value });
         };
+
+        // 動的な高さ計算
+        this.calculateListHeight = () => {
+            const windowHeight = window.innerHeight;
+            const appBarHeight = 64; // AppBarの高さ
+            const searchFieldHeight = 80; // TextFieldとマージンの高さ
+            const tableHeaderHeight = 56; // TableHeadの高さ
+            const bottomMargin = 100; // 下部のボタンエリアとマージン
+            const debugInfoHeight = 30; // デバッグ情報の高さ（開発時のみ）
+
+            const availableHeight = windowHeight - appBarHeight - searchFieldHeight - bottomMargin - debugInfoHeight;
+            return Math.max(300, availableHeight); // 最小300px
+        };
+
+        // 定数定義
+        this.DEFAULT_CONTAINER_WIDTH = 800;
+        this.TOTAL_COLUMN_WIDTH = this.columnWidths.reduce((sum, width) => sum + width, 0);
+
+        // コンテナ幅を取得（キャッシュ対応）
+        this.getContainerWidth = () => {
+            const element = document.querySelector('#tableRoot');
+            return element?.clientWidth || this.DEFAULT_CONTAINER_WIDTH;
+        };
+
+        // 動的な幅計算（PC・スマホ対応）
+        this.calculateListWidth = () => {
+            const containerWidth = this.getContainerWidth();
+            // 横幅が十分な場合は横スクロールを除去、不足時のみ横スクロール
+            return Math.max(this.TOTAL_COLUMN_WIDTH, containerWidth);
+        };
+
+        // 各列の動的幅計算
+        this.calculateColumnWidth = (index) => {
+            const containerWidth = this.getContainerWidth();
+
+            if (containerWidth > this.TOTAL_COLUMN_WIDTH) {
+                // 横幅が十分な場合は比例配分
+                return (this.columnWidths[index] / this.TOTAL_COLUMN_WIDTH) * containerWidth;
+            } else {
+                // 横幅が不足な場合は固定幅
+                return this.columnWidths[index];
+            }
+        };
+
+        // 横スクロールの必要性を判定
+        this.shouldShowHorizontalScroll = () => {
+            const containerWidth = this.getContainerWidth();
+            return containerWidth <= this.TOTAL_COLUMN_WIDTH;
+        };
+
+        // 仮想化行コンポーネント
+        this.VirtualRow = ({ index, style }) => {
+            // render内で計算されたfilteredDataを使用
+            const filteredData = this.state.data.filter(item => {
+                if (this.state.searchTerm === "") return true;
+                const searchTermLower = this.state.searchTerm.toLowerCase();
+                return (
+                    item.name?.toLowerCase().includes(searchTermLower) ||
+                    item.characterName?.toLowerCase().includes(searchTermLower) ||
+                    item.lineName?.toLowerCase().includes(searchTermLower) ||
+                    item.comment?.toLowerCase().includes(searchTermLower)
+                );
+            });
+
+            const value = filteredData[index];
+            if (!value) return null;
+
+            // 元のデータ配列でのindexを取得
+            const originalIndex = this.state.data.findIndex(item => item.emojiPackId === value.emojiPackId);
+
+            const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
+            const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
+
+            return (
+                <div style={{
+                    ...style,
+                    display: 'flex',
+                    alignItems: 'center',
+                    borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                    backgroundColor: index % 2 === 0 ? '#fafafa' : '#ffffff',
+                    width: '100%',
+                    minWidth: this.calculateListWidth()
+                }}>
+                    {/* ステータス列 */}
+                    <div style={{
+                        width: this.calculateColumnWidth(0),
+                        minWidth: this.columnWidths[0],
+                        padding: '16px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
+                        {
+                            this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
+                                (
+                                    this.state.emojiPackStatus?.[value?.emojiPackId]?.checkSuccess ?
+                                        (
+                                            (errorLength > 0 ) ?
+                                                <DangerousIcon style={{color: 'red'}} /> :
+                                                (
+                                                    (warningLength > 0) ?
+                                                        <WarningIcon style={{color: '#ffa700'}} /> : <CheckCircleIcon style={{color: 'green'}} />
+                                                )
+                                        )
+                                        : <WarningIcon style={{color: 'gray'}} />
+                                )
+                            : <CircularProgress size={24} />
+                        }
+                    </div>
+
+                    {/* アイコン列 */}
+                    <div style={{
+                        width: this.calculateColumnWidth(1),
+                        minWidth: this.columnWidths[1],
+                        padding: '16px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
+                        <img style={{width: '50px'}} src={value?.iconUrl} alt="emoji pack icon" />
+                    </div>
+
+                    {/* 絵文字パック名列 */}
+                    <div style={{
+                        width: this.calculateColumnWidth(2),
+                        minWidth: this.columnWidths[2],
+                        padding: '16px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
+                        {value?.name}
+                    </div>
+
+                    {/* バージョン列 */}
+                    <div style={{
+                        width: this.calculateColumnWidth(3),
+                        minWidth: this.columnWidths[3],
+                        padding: '16px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
+                        {value?.version}
+                    </div>
+
+                    {/* 詳細列 */}
+                    <div style={{
+                        width: this.calculateColumnWidth(4),
+                        minWidth: this.columnWidths[4],
+                        padding: '16px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
+                        <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
+                            <ChatBubbleIcon />
+                        </Button>
+                    </div>
+
+                    {/* インストール列 */}
+                    <div style={{
+                        width: this.calculateColumnWidth(5),
+                        minWidth: this.columnWidths[5],
+                        padding: '16px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
+                        <Button
+                            disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false}
+                            variant={'contained'}
+                            color="primary"
+                            onClick={() => {
+                                window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
+                            }}
+                        >
+                            <DownloadIcon />
+                        </Button>
+                    </div>
+                </div>
+            );
+        };
+
+
 
         // this.emojiPackChangeValue = (e) => {
         //     let emojiPack = this.state.editEmojiPack;
@@ -202,80 +398,6 @@ class EmojiRepo extends Component {
                 });
         }
 
-        this.makeList = () => {
-            const filteredData = this.state.data.filter(item => {
-                if (this.state.searchTerm === "") return true;
-                const searchTermLower = this.state.searchTerm.toLowerCase();
-                return (
-                    item.name?.toLowerCase().includes(searchTermLower) ||
-                    item.characterName?.toLowerCase().includes(searchTermLower) ||
-                    item.lineName?.toLowerCase().includes(searchTermLower) ||
-                    item.comment?.toLowerCase().includes(searchTermLower)
-                );
-            });
-            return filteredData.map((value, index) => {
-                const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
-                const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
-                // Adjust index to original index if needed for certain operations, but for rendering, sequential index is fine.
-                // For functions like handleEmojiPackManageDialogOpen, we might need to find original index if filteredData is used directly
-                // However, the current implementation of handleEmojiPackManageDialogOpen uses the index from the original data array if it's not modified.
-                // Let's assume for now that the index passed to dialog openers refers to the position in the *original* data array.
-                // This means we might need to adjust how `index` is used if `handleEmojiPackManageDialogOpen` expects an index from the original `this.state.data`.
-                // For now, we'll use the filtered index. If issues arise, we'll revise.
-                // A safer way would be to pass `value.emojiPackId` or the `value` object itself to handlers.
-                // The current `handleEmojiPackManageDialogOpen(true, index)` expects index from this.state.data.
-                // So, we should find the original index or pass the item directly.
-                // Let's find the original index:
-                const originalIndex = this.state.data.findIndex(originalItem => originalItem.emojiPackId === value.emojiPackId);
-
-                return (
-                    <TableRow key={value.emojiPackId}> {/* Added key for stability */}
-                        <TableCell style={{minWidth: '120px'}}>
-                            {
-                                this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
-                                    (
-                                        this.state.emojiPackStatus?.[value?.emojiPackId]?.checkSuccess ?
-                                            (
-                                                (errorLength > 0 ) ?
-                                                    <DangerousIcon style={{color: 'red'}} /> :
-                                                    (
-                                                        (warningLength > 0) ?
-                                                            <WarningIcon style={{color: '#ffa700'}} /> : <CheckCircleIcon style={{color: 'green'}} />
-                                                    )
-                                            )
-                                            : <WarningIcon style={{color: 'gray'}} />
-                                    )
-                                : <CircularProgress />
-                            }
-                        </TableCell>
-                        <TableCell style={{minWidth: '120px'}}>
-                            <img style={{width: '50px'}} src={value?.iconUrl} />
-                        </TableCell>
-                        <TableCell style={{minWidth: '120px'}}>
-                            {value?.name}
-                        </TableCell>
-                        <TableCell>
-                            {value?.version}
-                        </TableCell>
-                        <TableCell>
-                            <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
-                                    <ChatBubbleIcon />
-                                </Button>
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <Button disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false} variant={'contained'} color="primary" onClick={() => {
-                                window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
-                            }}>
-                                <DownloadIcon />
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                );
-            });
-        }
-
         this.getEmojiPackList = () => {
             axios.get(`/api/emoji`)
                 .then((response) => {
@@ -300,6 +422,13 @@ class EmojiRepo extends Component {
 
     componentDidMount() {
         this.getEmojiPackList();
+
+        // ウィンドウリサイズイベントリスナーを追加
+        this.handleResize = () => {
+            this.forceUpdate(); // 高さを再計算するために再レンダリング
+        };
+        window.addEventListener('resize', this.handleResize);
+
         // setTimeout(() => { // テスト用
         //     this.getEmojiPackList();
         // }, 8000);
@@ -308,8 +437,26 @@ class EmojiRepo extends Component {
         // }, 8000);
     }
 
+    componentWillUnmount() {
+        // イベントリスナーをクリーンアップ
+        if (this.handleResize) {
+            window.removeEventListener('resize', this.handleResize);
+        }
+    }
+
     render() {
         this.overlayWidth = document.querySelector('#tableBody')?.scrollWidth ? document.querySelector('#tableBody')?.scrollWidth+'px' : '100%';
+        const filteredData = this.state.data.filter(item => {
+            if (this.state.searchTerm === "") return true;
+            const searchTermLower = this.state.searchTerm.toLowerCase();
+            return (
+                item.name?.toLowerCase().includes(searchTermLower) ||
+                item.characterName?.toLowerCase().includes(searchTermLower) ||
+                item.lineName?.toLowerCase().includes(searchTermLower) ||
+                item.comment?.toLowerCase().includes(searchTermLower)
+            );
+        });
+
         return (
             <>
                 <div style={{flexGrow: 1}}>
@@ -328,29 +475,53 @@ class EmojiRepo extends Component {
                         value={this.state.searchTerm}
                         onChange={this.handleSearchChange}
                     />
-                    <Table id={'tableBody'} style={{width: '100%', minHeight: '120px'}}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell></TableCell>
-                                <TableCell></TableCell>
-                                <TableCell>絵文字パック名</TableCell>
-                                <TableCell>バージョン</TableCell>
-                                <TableCell>詳細</TableCell>
-                                <TableCell>インストール</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {this.makeList()}
-                        </TableBody>
-                    </Table>
-                    {this.state.isLoaded ? null : <div id={'circularRoot'} style={{
+
+                    {/* 仮想化ボディ */}
+                    {this.state.isLoaded && filteredData.length > 0 && (
+                        <FixedSizeList
+                            height={this.calculateListHeight()}
+                            itemCount={filteredData.length}
+                            itemSize={72}
+                            width="100%"
+                            style={{
+                                border: '1px solid rgba(224, 224, 224, 1)',
+                                overflowX: this.shouldShowHorizontalScroll() ? 'auto' : 'hidden',
+                                overflowY: 'auto'
+                            }}
+                        >
+                            {this.VirtualRow}
+                        </FixedSizeList>
+                    )}
+
+                    {/* データが0件の場合の表示 */}
+                    {this.state.isLoaded && filteredData.length === 0 && (
+                        <div style={{
+                            height: this.calculateListHeight(),
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '1px solid rgba(224, 224, 224, 1)',
+                            backgroundColor: '#fafafa'
+                        }}>
+                            {this.state.searchTerm ? '検索条件に一致するデータがありません' : 'データがありません'}
+                        </div>
+                    )}
+
+                    {/* デバッグ情報（一時的） */}
+                    {/*{process.env.NODE_ENV === 'development' && (*/}
+                    {/*    <div style={{padding: '10px', fontSize: '12px', color: '#666'}}>*/}
+                    {/*        Debug: データ件数={this.state.data.length}, フィルター後={filteredData.length}, 読み込み状態={this.state.isLoaded ? '完了' : '読み込み中'}*/}
+                    {/*    </div>*/}
+                    {/*)}*/}
+                     {!this.state.isLoaded && <div id={'circularRoot'} style={{
                         position: 'absolute',
-                        width: this.overlayWidth,
-                        height: '100%',
+                        width: '100%', // Use 100% for overlay
+                        height: 'calc(100% - 150px)', // Adjust height considering TextField and TableHead
+                        top: '150px', // Position below TextField and TableHead
                         textAlign: 'center',
                         backgroundColor: 'rgb(127 127 127 / 51%)',
-                        'bottom': '0'
-                    }}><CircularProgress style={{position: 'absolute', top: '38%', transform: 'translate(0, -50%)'}}/>
+                        zIndex: 2, // Ensure it's above the list but below dialogs
+                    }}><CircularProgress style={{position: 'absolute', top: '38%', transform: 'translate(-50%, -50%)', left: '50%'}}/>
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
