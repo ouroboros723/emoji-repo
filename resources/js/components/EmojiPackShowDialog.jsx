@@ -9,7 +9,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import PropTypes from "prop-types";
 import {Avatar, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@material-ui/core";
 import moment from "moment/moment";
-import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import TextShow from "./TextShow";
 import DownloadIcon from "@mui/icons-material/Download";
 

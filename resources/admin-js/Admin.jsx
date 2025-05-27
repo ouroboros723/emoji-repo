@@ -12,10 +12,11 @@ import {
     TableRow, Typography,
     TextField
 } from "@material-ui/core";
+import { FixedSizeList } from 'react-window';
 import axios from "axios";
 import EmojiPackManageDialog from "./components/EmojiPackManageDialog";
 import NewEmojiPackDialog from "./components/NewEmojiPackDialog";
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CommentShow from "../admin-js/components/CommentShow";
 import DownloadIcon from '@mui/icons-material/Download';
 import DangerousIcon from "@mui/icons-material/Dangerous";
@@ -119,6 +120,79 @@ class Admin extends Component {
             this.setState({ searchTerm: event.target.value });
         };
 
+        this.Row = ({ index, style }) => {
+            const filteredData = this.state.data.filter(item => {
+                if (this.state.searchTerm === "") return true;
+                const searchTermLower = this.state.searchTerm.toLowerCase();
+                return (
+                    item.name?.toLowerCase().includes(searchTermLower) ||
+                    item.characterName?.toLowerCase().includes(searchTermLower) || // Assuming these might exist based on EmojiRepo
+                    item.lineName?.toLowerCase().includes(searchTermLower) || // Assuming these might exist
+                    item.comment?.toLowerCase().includes(searchTermLower) // Assuming these might exist
+                );
+            });
+
+            const value = filteredData[index];
+            if (!value) return null;
+
+            const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
+            const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
+            const originalIndex = this.state.data.findIndex(originalItem => originalItem.emojiPackId === value.emojiPackId);
+
+            return (
+                <TableRow key={value.emojiPackId} style={style}>
+                    <TableCell style={{minWidth: '120px'}}>
+                        {
+                            this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
+                                (
+                                    this.state.emojiPackStatus?.[value?.emojiPackId]?.checkSuccess ?
+                                        (
+                                            (errorLength > 0 ) ?
+                                                <DangerousIcon style={{color: 'red'}} /> :
+                                                (
+                                                    (warningLength > 0) ?
+                                                        <WarningIcon style={{color: '#ffa700'}} /> : <CheckCircleIcon style={{color: 'green'}} />
+                                                )
+                                        )
+                                        : <WarningIcon style={{color: 'gray'}} />
+                                )
+                                : <CircularProgress size={24}/>
+                        }
+                    </TableCell>
+                    <TableCell style={{minWidth: '120px'}}>
+                        <img style={{width: '50px'}} src={value?.iconUrl} />
+                    </TableCell>
+                    <TableCell style={{minWidth: '120px'}}>
+                        {value?.name}
+                    </TableCell>
+                    <TableCell>
+                        {value?.version}
+                    </TableCell>
+                    <TableCell>
+                        <Button disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false} variant={'contained'} color="primary" onClick={() => {
+                            window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
+                        }}>
+                            <DownloadIcon />
+                        </Button>
+                    </TableCell>
+                    <TableCell>
+                        <div style={{textAlign: 'center'}}>
+                            <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
+                                編集
+                            </Button>
+                        </div>
+                    </TableCell>
+                    <TableCell>
+                        <div style={{textAlign: 'center'}}>
+                            <Button variant={'contained'} color="primary" onClick={() => this.deleteEmojiPack(value.emojiPackId, value.name)} style={{backgroundColor: '#df0000'}}>
+                                <DeleteForeverIcon />
+                            </Button>
+                        </div>
+                    </TableCell>
+                </TableRow>
+            );
+        };
+
         this.execRegister = () => {
             axios.post(`/api/admin/emoji/add`, this.state.newEmojiPack)
                 .then(()=> {
@@ -136,77 +210,6 @@ class Admin extends Component {
                         alert("登録に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
                     }
                 });
-        }
-
-        this.makeList = () => {
-            const filteredData = this.state.data.filter(item => {
-                if (this.state.searchTerm === "") return true;
-                const searchTermLower = this.state.searchTerm.toLowerCase();
-                return (
-                    item.name?.toLowerCase().includes(searchTermLower) ||
-                    item.characterName?.toLowerCase().includes(searchTermLower) ||
-                    item.lineName?.toLowerCase().includes(searchTermLower) ||
-                    item.comment?.toLowerCase().includes(searchTermLower)
-                );
-            });
-            return filteredData.map((value, index) => {
-                const warningLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.warnings ?? {})?.length;
-                const errorLength = Object.keys(this.state.emojiPackStatus?.[value?.emojiPackId]?.body?.errors ?? {})?.length;
-                const originalIndex = this.state.data.findIndex(originalItem => originalItem.emojiPackId === value.emojiPackId);
-
-                return (
-                    <TableRow key={value.emojiPackId}> {/* Added key for stability */}
-                        <TableCell style={{minWidth: '120px'}}>
-                            {
-                                this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?
-                                    (
-                                        this.state.emojiPackStatus?.[value?.emojiPackId]?.checkSuccess ?
-                                            (
-                                                (errorLength > 0 ) ?
-                                                    <DangerousIcon style={{color: 'red'}} /> :
-                                                    (
-                                                        (warningLength > 0) ?
-                                                            <WarningIcon style={{color: '#ffa700'}} /> : <CheckCircleIcon style={{color: 'green'}} />
-                                                    )
-                                            )
-                                            : <WarningIcon style={{color: 'gray'}} />
-                                    )
-                                    : <CircularProgress />
-                            }
-                        </TableCell>
-                        <TableCell style={{minWidth: '120px'}}>
-                            <img style={{width: '50px'}} src={value?.iconUrl} />
-                        </TableCell>
-                        <TableCell style={{minWidth: '120px'}}>
-                            {value?.name}
-                        </TableCell>
-                        <TableCell>
-                            {value?.version}
-                        </TableCell>
-                        <TableCell>
-                            <Button disabled={(this.state.emojiPackStatus?.[value?.emojiPackId]?.isStatusLoaded ?? false) ? (errorLength > 0) : false} variant={'contained'} color="primary" onClick={() => {
-                                window.open(this.props?.concurrentRedirectUrl+value?.sourceUrl, '_blank');
-                            }}>
-                                <DownloadIcon />
-                            </Button>
-                        </TableCell>
-                        <TableCell>
-                            <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
-                                    編集
-                                </Button>
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <div style={{textAlign: 'center', margin: '20px'}}>
-                                <Button variant={'contained'} color="primary" onClick={() => this.deleteEmojiPack(value.emojiPackId, value.name)} style={{backgroundColor: '#df0000'}}>
-                                    <DeleteForeverIcon />
-                                </Button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                );
-            });
         }
 
         this.getEmojiPackList = () => {
@@ -337,6 +340,17 @@ class Admin extends Component {
 
     render() {
         this.overlayWidth = document.querySelector('#tableBody')?.scrollWidth ? document.querySelector('#tableBody')?.scrollWidth+'px' : '100%';
+        const filteredData = this.state.data.filter(item => {
+            if (this.state.searchTerm === "") return true;
+            const searchTermLower = this.state.searchTerm.toLowerCase();
+            return (
+                item.name?.toLowerCase().includes(searchTermLower) ||
+                item.characterName?.toLowerCase().includes(searchTermLower) ||
+                item.lineName?.toLowerCase().includes(searchTermLower) ||
+                item.comment?.toLowerCase().includes(searchTermLower)
+            );
+        });
+
         return (
             <>
                 <div style={{flexGrow: 1}}>
@@ -360,7 +374,7 @@ class Admin extends Component {
                         </Typography>
                     </AppBar>
                 </div>
-                <TableContainer id={'tableRoot'} component={Paper} style={{position: 'relative', width: '80vw', margin: 'auto', marginTop: '60px'}}>
+                <TableContainer id={'tableRoot'} component={Paper} style={{position: 'relative', width: '80vw', margin: 'auto', marginTop: '60px', overflow: 'hidden'}}>
                     <TextField
                         label="絵文字パック名を検索"
                         variant="outlined"
@@ -368,23 +382,38 @@ class Admin extends Component {
                         value={this.state.searchTerm}
                         onChange={this.handleSearchChange}
                     />
-                    <Table id={'tableBody'} style={{width: '100%', minHeight: '120px'}}>
+                    <Table style={{width: '100%', tableLayout: 'fixed'}}>
                         <TableHead>
                             <TableRow >
-                                <TableCell></TableCell>
-                                <TableCell></TableCell>
-                                <TableCell>絵文字パック名</TableCell>
-                                <TableCell>バージョン</TableCell>
-                                <TableCell>インストール</TableCell>
-                                <TableCell>編集</TableCell>
-                                <TableCell>削除</TableCell>
+                                <TableCell style={{width: '5%'}}></TableCell>
+                                <TableCell style={{width: '10%'}}></TableCell>
+                                <TableCell style={{width: '30%'}}>絵文字パック名</TableCell>
+                                <TableCell style={{width: '10%'}}>バージョン</TableCell>
+                                <TableCell style={{width: '15%'}}>インストール</TableCell>
+                                <TableCell style={{width: '15%'}}>編集</TableCell>
+                                <TableCell style={{width: '15%'}}>削除</TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableBody>
-                            {this.makeList()}
-                        </TableBody>
                     </Table>
-                    {this.state.isLoaded ? null : <div id={'circularRoot'} style={{position: 'absolute', width: this.overlayWidth, height: '100%', textAlign: 'center', backgroundColor: 'rgb(127 127 127 / 51%)', 'bottom': '0'}}><CircularProgress style={{position: 'absolute', top: '38%', transform: 'translate(0, -50%)'}} />
+                    {this.state.isLoaded && (
+                        <FixedSizeList
+                            height={400}
+                            itemCount={filteredData.length}
+                            itemSize={75} // Adjust as needed
+                            width={'100%'}
+                        >
+                            {this.Row}
+                        </FixedSizeList>
+                    )}
+                    {!this.state.isLoaded && <div id={'circularRoot'} style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: 'calc(100% - 150px)', // Adjust based on TextField and TableHead height
+                        top: '150px', // Adjust based on TextField and TableHead height
+                        textAlign: 'center',
+                        backgroundColor: 'rgb(127 127 127 / 51%)',
+                        zIndex: 2
+                    }}><CircularProgress style={{position: 'absolute', top: '38%', transform: 'translate(-50%, -50%)', left: '50%'}} />
                     </div>}
                 </TableContainer>
                 <div style={{textAlign: 'center', margin: '20px'}}>
