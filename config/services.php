@@ -34,4 +34,9 @@ return [
         "client_secret" => env("TWITTER_CLIENT_SECRET"),
         "redirect" => env("CALLBACK_URL"),
     ],
+
+    "concrnt" => [
+        "auth_url" => env("CONCRNT_AUTH_URL", "https://concrnt.world/authorize"),
+        "app_name" => env("CONCRNT_APP_NAME", "Emoji Repository"),
+    ],
 ];
