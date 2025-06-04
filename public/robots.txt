@@ -1,2 +1,7 @@
 User-agent: *
 Disallow:
+
+# PWA Files
+Allow: /manifest.json
+Allow: /sw.js
+Allow: /icons/

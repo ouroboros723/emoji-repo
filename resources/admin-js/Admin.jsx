@@ -299,15 +299,21 @@ class Admin extends Component {
                     {/* 編集列 */}
                     <div style={{
                         width: this.calculateColumnWidth(5),
-                        minWidth: this.columnWidths[5],
+                        minWidth: '122px',
                         padding: '16px',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center'
                     }}>
-                        <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
-                            編集
-                        </Button>
+                        {value.canEdit ? (
+                            <Button variant={'contained'} color="primary" onClick={() => this.handleEmojiPackManageDialogOpen(true, originalIndex)}>
+                                編集
+                            </Button>
+                        ) : (
+                            <Button variant={'contained'} disabled>
+                                編集不可
+                            </Button>
+                        )}
                     </div>
 
                     {/* 削除列 */}
@@ -319,9 +325,15 @@ class Admin extends Component {
                         justifyContent: 'center',
                         alignItems: 'center'
                     }}>
-                        <Button variant={'contained'} color="primary" onClick={() => this.deleteEmojiPack(value.emojiPackId, value.name)} style={{backgroundColor: '#df0000'}}>
-                            <DeleteForeverIcon />
-                        </Button>
+                        {value.canEdit ? (
+                            <Button variant={'contained'} color="primary" onClick={() => this.deleteEmojiPack(value.emojiPackId, value.name)} style={{backgroundColor: '#df0000'}}>
+                                <DeleteForeverIcon />
+                            </Button>
+                        ) : (
+                            <Button variant={'contained'} disabled>
+                                <DeleteForeverIcon />
+                            </Button>
+                        )}
                     </div>
                 </div>
             );
@@ -337,11 +349,14 @@ class Admin extends Component {
                         sourceUrl: '',
                     }
                     this.setState({newEmojiPack: newEmojiPack});
+                    alert('絵文字パックが正常に登録されました。');
                 })
                 .catch((error) => {
-                    let responseData = error.response.data;
-                    if(responseData.message === 'already_registered') {
+                    let responseData = error.response?.data;
+                    if(responseData?.message === 'already_registered') {
                         alert('この絵文字パックは既に登録されています。');
+                    } else if(responseData?.message === 'permission_denied') {
+                        alert('この絵文字パックを編集する権限がありません。');
                     } else {
                         alert("登録に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
                     }
@@ -357,6 +372,11 @@ class Admin extends Component {
                     response.data.body.map((value, index) => {
                         this.checkEmojiPack(value?.emojiPackId);
                     });
+                })
+                .catch((error) => {
+                    let responseData = error.response?.data;
+                    alert("絵文字パック一覧の取得に失敗しました。\n" + responseData?.message);
+                    this.setState({isLoaded: true});
                 });
         }
 
@@ -374,14 +394,19 @@ class Admin extends Component {
                 this.setState({isLoaded: false});
                 axios.post(`/api/admin/emoji/${id}`, this.state.editEmojiPack)
                     .then(() => {
-
+                        alert('更新が完了しました。');
                     })
                     .catch((error) => {
-                        let responseData = error.response.data;
-                        alert("登録に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
+                        let responseData = error.response?.data;
+                        if (responseData?.message === 'permission_denied') {
+                            alert('この絵文字パックを編集する権限がありません。');
+                        } else {
+                            alert("更新に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
+                        }
                     })
                     .finally(() => {
                         this.getEmojiPackList();
+                        this.setState({isLoaded: true});
                     });
             }
         }
@@ -392,6 +417,17 @@ class Admin extends Component {
                 axios.delete(`/api/admin/emoji/${id}`)
                     .then(() => {
                         this.getEmojiPackList();
+                    })
+                    .catch((error) => {
+                        let responseData = error.response?.data;
+                        if (responseData?.message === 'permission_denied') {
+                            alert('この絵文字パックを削除する権限がありません。');
+                        } else {
+                            alert("削除に失敗しました。時間をおいてお試しください。\n" + responseData?.message);
+                        }
+                    })
+                    .finally(() => {
+                        this.setState({isLoaded: true});
                     });
             }
         });

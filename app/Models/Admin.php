@@ -70,4 +70,12 @@ class Admin extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * この管理者が作成した絵文字パック
+     */
+    public function emojiPacks()
+    {
+        return $this->hasMany(EmojiPack::class, 'created_by_admin_id');
+    }
 }
