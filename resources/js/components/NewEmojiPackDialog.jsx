@@ -25,8 +25,8 @@ export default function NewEmojiPackDialog(props) {
 
     return (
         <div>
-            <Button variant={'contained'} color="primary" onClick={handleClickOpen}>
-                新規登録する
+            <Button variant={'contained'} color="primary" onClick={() => {window.location.href='/admin/login'}}>
+                ログインして登録
             </Button>
             <Dialog open={props.open} onClose={handleClose} aria-labelledby="form-dialog-title" style={props?.style}>
                 <DialogTitle id="form-dialog-title">絵文字パック追加</DialogTitle>

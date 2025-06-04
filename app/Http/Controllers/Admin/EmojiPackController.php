@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\EditEmojiPackRequest;
 use App\Models\EmojiPack;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use JsonException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,9 +20,19 @@ class EmojiPackController extends BaseController
      */
     public function getList(): JsonResponse
     {
+        $admin = Auth::guard('api')->user();
+
+        // 全ての絵文字パックを取得し、編集可能かどうかの情報を追加
         $EmojiPacks = EmojiPack::orderByDesc('emoji_pack_id')->get();
 
-        return $this->sendResponse(array_key_camel($EmojiPacks->toArray()));
+        // 各絵文字パックに編集可能フラグを追加
+        $EmojiPacksWithPermission = $EmojiPacks->map(function ($emojiPack) use ($admin) {
+            $emojiPackArray = $emojiPack->toArray();
+            $emojiPackArray['can_edit'] = $emojiPack->canEditBy($admin);
+            return $emojiPackArray;
+        });
+
+        return $this->sendResponse(array_key_camel($EmojiPacksWithPermission->toArray()));
     }
 
     /**
@@ -31,6 +42,7 @@ class EmojiPackController extends BaseController
      */
     public function addEmojiPack(AddEmojiPackRequest $request): JsonResponse
     {
+        $admin = Auth::guard('api')->user();
         $sourceUrl = file_get_contents($request->sourceUrl);
         $emojiPackMetaData = json_decode($sourceUrl, true, 512, JSON_THROW_ON_ERROR);
 
@@ -41,6 +53,7 @@ class EmojiPackController extends BaseController
             $EmojiPack->fill(array_key_snake($emojiPackMetaData));
             $EmojiPack->source_url = $request->sourceUrl;
             $EmojiPack->icon_url = $emojiPackMetaData['iconURL'];
+            $EmojiPack->created_by_admin_id = $admin->id; // 作成者IDを設定
             $EmojiPack->is_approved = true; // 管理画面からの登録はtrueで固定
             if($EmojiPack->save()){
                 return $this->sendSuccess();
@@ -49,6 +62,11 @@ class EmojiPackController extends BaseController
         }
 
         if($alreadyRegisteredEmojiPack->version !== $emojiPackMetaData['version']) {
+            // 既存の絵文字パックの編集権限をチェック
+            if (!$alreadyRegisteredEmojiPack->canEditBy($admin)) {
+                return $this->sendError('permission_denied', Response::HTTP_FORBIDDEN);
+            }
+
             $alreadyRegisteredEmojiPack->fill(array_key_snake($emojiPackMetaData));
             $alreadyRegisteredEmojiPack->source_url = $request->sourceUrl;
             $alreadyRegisteredEmojiPack->icon_url = $emojiPackMetaData['iconURL'];
@@ -68,9 +86,15 @@ class EmojiPackController extends BaseController
      */
     public function showEmojiPackDetail($id): JsonResponse
     {
+        $admin = Auth::guard('api')->user();
         $EmojiPack = EmojiPack::findOrFail($id);
         $EmojiPack->emojis = json_decode(file_get_contents($EmojiPack->source_url), true, 512, JSON_THROW_ON_ERROR)['emojis'] ?? [];
-        return $this->sendResponse(array_key_camel($EmojiPack->toArray()));
+
+        // 編集可能フラグを追加
+        $emojiPackArray = $EmojiPack->toArray();
+        $emojiPackArray['can_edit'] = $EmojiPack->canEditBy($admin);
+
+        return $this->sendResponse(array_key_camel($emojiPackArray));
     }
 
     /**
@@ -80,10 +104,16 @@ class EmojiPackController extends BaseController
      */
     public function editEmojiPack(EditEmojiPackRequest $request, $id): JsonResponse
     {
-//        dd($request->toArray());
-        $Participant = EmojiPack::findOrFail($id);
-        $Participant->fill(array_key_snake($request->toArray()));
-        if($Participant->save()){
+        $admin = Auth::guard('api')->user();
+        $EmojiPack = EmojiPack::findOrFail($id);
+
+        // 編集権限をチェック
+        if (!$EmojiPack->canEditBy($admin)) {
+            return $this->sendError('permission_denied', Response::HTTP_FORBIDDEN);
+        }
+
+        $EmojiPack->fill(array_key_snake($request->toArray()));
+        if($EmojiPack->save()){
             return $this->sendSuccess();
         }
         return $this->sendError('failed_save');
@@ -95,9 +125,16 @@ class EmojiPackController extends BaseController
      */
     public function setApproved($id): JsonResponse
     {
-        $Participant = EmojiPack::findOrFail($id);
-        $Participant->is_approved = true;
-        if($Participant->save()){
+        $admin = Auth::guard('api')->user();
+        $EmojiPack = EmojiPack::findOrFail($id);
+
+        // 編集権限をチェック
+        if (!$EmojiPack->canEditBy($admin)) {
+            return $this->sendError('permission_denied', Response::HTTP_FORBIDDEN);
+        }
+
+        $EmojiPack->is_approved = true;
+        if($EmojiPack->save()){
             return $this->sendSuccess();
         }
         return $this->sendError('failed_save');
@@ -110,8 +147,15 @@ class EmojiPackController extends BaseController
      */
     public function deleteEmojiPack($id): JsonResponse
     {
-        $Participant = EmojiPack::findOrFail($id);
-        if($Participant->delete()){
+        $admin = Auth::guard('api')->user();
+        $EmojiPack = EmojiPack::findOrFail($id);
+
+        // 編集権限をチェック
+        if (!$EmojiPack->canEditBy($admin)) {
+            return $this->sendError('permission_denied', Response::HTTP_FORBIDDEN);
+        }
+
+        if($EmojiPack->delete()){
             return $this->sendSuccess();
         }
         return $this->sendError('failed_cancel');

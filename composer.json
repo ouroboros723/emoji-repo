@@ -9,15 +9,17 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
+        "ext-json": "*",
         "cerbero/command-validator": "^2.5",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "kornrunner/keccak": "^1.1",
         "laravel/framework": "^8.12",
         "laravel/socialite": "^5.5",
         "laravel/tinker": "^2.5",
         "laravel/ui": "3",
-      "ext-json": "*"
+        "web3p/ethereum-util": "^0.1.4"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.10",
