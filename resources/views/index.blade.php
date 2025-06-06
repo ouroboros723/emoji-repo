@@ -60,62 +60,62 @@
 <script src="https://ajaxzip3.github.io/ajaxzip3.js" charset="UTF-8"></script>
 
 <!-- PWA Service Worker Registration -->
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+{{--<script>--}}
+{{--if ('serviceWorker' in navigator) {--}}
+{{--    window.addEventListener('load', function() {--}}
+{{--        navigator.serviceWorker.register('/sw.js')--}}
+{{--            .then(function(registration) {--}}
+{{--                console.log('ServiceWorker registration successful with scope: ', registration.scope);--}}
 
-                // アップデートチェック
-                registration.addEventListener('updatefound', () => {
-                    const newWorker = registration.installing;
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // 新しいコンテンツが利用可能
-                            if (confirm('新しいバージョンが利用可能です。更新しますか？')) {
-                                window.location.reload();
-                            }
-                        }
-                    });
-                });
-            })
-            .catch(function(err) {
-                console.log('ServiceWorker registration failed: ', err);
-            });
-    });
-}
+{{--                // アップデートチェック--}}
+{{--                registration.addEventListener('updatefound', () => {--}}
+{{--                    const newWorker = registration.installing;--}}
+{{--                    newWorker.addEventListener('statechange', () => {--}}
+{{--                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {--}}
+{{--                            // 新しいコンテンツが利用可能--}}
+{{--                            if (confirm('新しいバージョンが利用可能です。更新しますか？')) {--}}
+{{--                                window.location.reload();--}}
+{{--                            }--}}
+{{--                        }--}}
+{{--                    });--}}
+{{--                });--}}
+{{--            })--}}
+{{--            .catch(function(err) {--}}
+{{--                console.log('ServiceWorker registration failed: ', err);--}}
+{{--            });--}}
+{{--    });--}}
+{{--}--}}
 
-// PWA インストールプロンプト
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('PWA install prompt triggered');
-    e.preventDefault();
-    deferredPrompt = e;
+{{--// PWA インストールプロンプト--}}
+{{--let deferredPrompt;--}}
+{{--window.addEventListener('beforeinstallprompt', (e) => {--}}
+{{--    console.log('PWA install prompt triggered');--}}
+{{--    e.preventDefault();--}}
+{{--    deferredPrompt = e;--}}
 
-    // インストールボタンを表示する場合はここで実装
-    // showInstallButton();
-});
+{{--    // インストールボタンを表示する場合はここで実装--}}
+{{--    // showInstallButton();--}}
+{{--});--}}
 
-// PWA インストール関数（必要に応じて呼び出し）
-function installPWA() {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the PWA install prompt');
-            } else {
-                console.log('User dismissed the PWA install prompt');
-            }
-            deferredPrompt = null;
-        });
-    }
-}
+{{--// PWA インストール関数（必要に応じて呼び出し）--}}
+{{--function installPWA() {--}}
+{{--    if (deferredPrompt) {--}}
+{{--        deferredPrompt.prompt();--}}
+{{--        deferredPrompt.userChoice.then((choiceResult) => {--}}
+{{--            if (choiceResult.outcome === 'accepted') {--}}
+{{--                console.log('User accepted the PWA install prompt');--}}
+{{--            } else {--}}
+{{--                console.log('User dismissed the PWA install prompt');--}}
+{{--            }--}}
+{{--            deferredPrompt = null;--}}
+{{--        });--}}
+{{--    }--}}
+{{--}--}}
 
-// PWA がインストールされた時の処理
-window.addEventListener('appinstalled', (evt) => {
-    console.log('PWA was installed');
-});
+{{--// PWA がインストールされた時の処理--}}
+{{--window.addEventListener('appinstalled', (evt) => {--}}
+{{--    console.log('PWA was installed');--}}
+{{--});--}}
 </script>
 
 @csrf
