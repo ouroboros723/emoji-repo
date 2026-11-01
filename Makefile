@@ -1,5 +1,9 @@
-###予めnodeとyarnのインストールが必要
+### Docker と GNU Make が必要（PHP・Composer・Node.js・pnpm はすべて app コンテナ内で実行）
 include .env
+
+# staging 用: app イメージで一時コンテナを起動してコマンドを実行する（DB には接続しない）
+# 生成物がホストのユーザー所有になるよう、ホストの UID/GID で実行する
+STAGING_RUN = docker-compose run --rm --no-deps --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e COMPOSER_HOME=/tmp/composer -e NODE_OPTIONS=--max-old-space-size=1024 app
 
 default:
 	@make migrate
@@ -16,10 +20,9 @@ create-project:
 	docker-compose exec app php artisan key:generate
 	docker-compose exec app php artisan storage:link
 	docker-compose exec app chmod -R 777 storage bootstrap/cache
-	@make yarn-install
+	@make pnpm-install
 	@make fresh
 install-recommend-packages:
-	docker-compose exec app composer require doctrine/dbal "^2"
 	docker-compose exec app composer require --dev ucan-lab/laravel-dacapo
 	docker-compose exec app composer require --dev barryvdh/laravel-ide-helper
 	docker-compose exec app composer require --dev beyondcode/laravel-dump-server
@@ -39,8 +42,8 @@ init:
 	docker-compose exec app php artisan key:generate
 	docker-compose exec app php artisan storage:link
 	docker-compose exec app chmod -R 777 storage bootstrap/cache
-	@make yarn-install
-	@make yarn-dev
+	@make pnpm-install
+	@make pnpm-dev
 	@make fresh
 	docker-compose exec db bash -c "echo \"create user 'root'@'127.*' identified by '$(DB_PASSWORD)';\" | mysql -u root -p$(DB_PASSWORD) $(DB_DATABASE)"
 	docker-compose exec db bash -c "echo \"grant all on $(DB_DATABASE).* to 'root'@'127.*' with grant option;\" | mysql -u root -p$(DB_PASSWORD) $(DB_DATABASE)"
@@ -59,16 +62,16 @@ init:
 	docker-compose exec db bash -c "echo \"create user '$(DB_USERNAME)'@'_gateway' identified by '$(DB_PASSWORD)';\" | mysql -u root -p$(DB_PASSWORD) $(DB_DATABASE)"
 	docker-compose exec db bash -c "echo \"grant all on $(DB_DATABASE).* to '$(DB_USERNAME)'@'_gateway' with grant option;\" | mysql -u root -p$(DB_PASSWORD) $(DB_DATABASE)"
 init-staging:
-	export NODE_OPTIONS="--max-old-space-size=1024"
-	php ./composer.phar install
+	docker-compose build app
+	$(STAGING_RUN) composer install
 	-@chmod 777 -R ./
 	php artisan key:generate
 	php artisan storage:link
 	-@chmod -R 777 storage bootstrap/cache
-	@make yarn-install
-	@make yarn-dev
+	$(STAGING_RUN) pnpm install --frozen-lockfile
+	$(STAGING_RUN) pnpm run dev
 	php ./artisan migrate
-	php artisan scribe:generate
+#	php artisan scribe:generate
 remake:
 	@make destroy
 	@make init
@@ -143,17 +146,17 @@ migrate:
 	docker-compose exec db bash -c "echo \"grant all on $(DB_DATABASE).* to '$(DB_USERNAME)'@'192.*' with grant option;\" | mysql -u root -p$(DB_PASSWORD) $(DB_DATABASE)"
 	docker-compose exec db bash -c "echo \"create user '$(DB_USERNAME)'@'_gateway' identified by '$(DB_PASSWORD)';\" | mysql -u root -p$(DB_PASSWORD) $(DB_DATABASE)"
 	docker-compose exec db bash -c "echo \"grant all on $(DB_DATABASE).* to '$(DB_USERNAME)'@'_gateway' with grant option;\" | mysql -u root -p$(DB_PASSWORD) $(DB_DATABASE)"
-	yarn install
-	yarn run dev
+	docker-compose exec app pnpm install --frozen-lockfile
+	docker-compose exec app pnpm run dev
 	docker-compose exec app bash -c "rm -f /work/.scribe/endpoints.cache/*"
 #	docker-compose exec app php artisan scribe:generate
 migrate-staging:
-	export NODE_OPTIONS="--max-old-space-size=1024"
-	php ./composer.phar install
+	docker-compose build app
+	$(STAGING_RUN) composer install
 	php artisan migrate
-	yarn install
-	yarn run dev
-	php artisan scribe:generate
+	$(STAGING_RUN) pnpm install --frozen-lockfile
+	$(STAGING_RUN) pnpm run dev
+#	php artisan scribe:generate
 fresh:
 	docker-compose exec app php artisan migrate:fresh --seed
 seed:
@@ -180,30 +183,18 @@ cache-clear:
 	docker-compose exec app composer clear-cache
 	@make optimize-clear
 	docker-compose exec app php artisan event:clear
-npm:
-	@make npm-install
-npm-install:
-	docker-compose exec web npm install
-npm-dev:
-	docker-compose exec web npm run dev
-npm-watch:
-	docker-compose exec web npm run watch
-npm-watch-poll:
-	docker-compose exec web npm run watch-poll
-npm-hot:
-	docker-compose exec web npm run hot
-yarn:
-	yarn
-yarn-install:
-	@make yarn
-yarn-dev:
-	yarn dev
-yarn-watch:
-	yarn watch
-yarn-watch-poll:
-	yarn watch-poll
-yarn-hot:
-	yarn hot
+pnpm:
+	@make pnpm-install
+pnpm-install:
+	docker-compose exec app pnpm install --frozen-lockfile
+pnpm-dev:
+	docker-compose exec app pnpm run dev
+pnpm-prod:
+	docker-compose exec app pnpm run prod
+pnpm-watch:
+	docker-compose exec app pnpm run watch
+pnpm-watch-poll:
+	docker-compose exec app pnpm run watch-poll
 db:
 	docker-compose exec db bash
 sql:

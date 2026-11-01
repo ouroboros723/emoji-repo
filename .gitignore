@@ -18,6 +18,7 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+pnpm-debug.log*
 /public/css/*
 
 # IDE Settings
@@ -28,3 +29,7 @@ yarn-error.log
 # プロジェクトの除外パス
 /storage/app/
 /storage/framework/
+
+# DBバックアップ（make migrate / make db-backup が出力。実データを含むためコミットしない）
+/infra/dbBackup/*
+!/infra/dbBackup/.gitkeep
