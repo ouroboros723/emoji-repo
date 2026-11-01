@@ -20,7 +20,7 @@ trait ApiResponseTrait
      * @param  string       $message
      * @return JsonResponse
      */
-    public function sendResponse($result, $message = '', $code = 200, bool $success = null): JsonResponse
+    public function sendResponse($result, $message = '', $code = 200, ?bool $success = null): JsonResponse
     {
         return Response::json(
             [

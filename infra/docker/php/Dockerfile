@@ -1,9 +1,10 @@
-FROM php:7-fpm-buster
+FROM php:8.5-fpm
 LABEL maintainer="ucan-lab <yes@u-can.pro>"
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 
 # timezone environment
-ENV TZ=JST \
+ARG TZ=Asia/Tokyo
+ENV TZ=${TZ} \
   # locale
   LANG=ja_JP.UTF-8 \
   LANGUAGE=ja_JP:ja \
@@ -12,10 +13,10 @@ ENV TZ=JST \
   COMPOSER_ALLOW_SUPERUSER=1 \
   COMPOSER_HOME=/composer
 
-COPY --from=composer:2.0 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN apt-get update && \
-  apt-get -y install task-japanese git libicu-dev libonig-dev libzip-dev libgmp-dev gzip unzip locales && \
+  apt-get -y install git libicu-dev libzip-dev libgmp-dev unzip locales && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* && \
   locale-gen en_US.UTF-8 && \
@@ -29,5 +30,6 @@ RUN apt-get update && \
 
 COPY ./infra/docker/php/php-fpm.d/zzz-www.conf /usr/local/etc/php-fpm.d/zzz-www.conf
 COPY ./infra/docker/php/php.ini /usr/local/etc/php/php.ini
+RUN sed -i "s|^date.timezone = .*|date.timezone = ${TZ}|" /usr/local/etc/php/php.ini
 
 WORKDIR /work
