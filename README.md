@@ -1,12 +1,13 @@
 ドキュメント準備中...
 
 # 動作に必要なもの
-- node.js（Ver.18 LTS）
-- yarn（npmは取り敢えず非推奨とします）
 - GNU Make
 - Docker
 - docker-compose
 - laravel-echo-server
+
+PHP 8.5・Composer・Node.js 24・pnpm は app コンテナに入っているため、ホストへのインストールは不要です。
+（`make init-staging` / `make migrate-staging` では、`php artisan` だけはサーバー上の PHP 8.5 で実行します。）
 
 # セットアップ方法
 - `.env.example` を `.env` という名前でコピーします。
@@ -21,6 +22,9 @@
 - `make migrate` docker-compose経由でシステムのアップデート処理を行います。
 - `make migrate-staging` システムのアップデート処理をサーバー上で直接行います。
 - `make start-service` docker-compose経由で、常駐サービスを開始します。(写真一覧のリアルタイム更新に必要です。)
+- `make pnpm-install` app コンテナでフロントエンドの依存パッケージをインストールします。
+- `make pnpm-dev` / `make pnpm-prod` app コンテナでフロントエンドをビルドします（開発用 / 本番用）。
+- `make pnpm-watch` / `make pnpm-watch-poll` app コンテナでファイルの変更を監視してビルドします。
 
 # artisan コマンド
 - `docker-compose exec app php artisan admin:add-user` 管理者ユーザーを追加します。
