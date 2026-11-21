@@ -125,8 +125,7 @@ migrate:
 	docker-compose exec db bash -c "mysqldump -u root -p$(DB_PASSWORD) --hex-blob $(DB_DATABASE) > /dbBackup/db_before_migrate.sql"
 	docker-compose down --remove-orphans --volumes
 	docker-compose up -d --build
-	docker-compose exec app bash -c "sleep 60"
-	docker-compose exec app bash -c 'until mysqladmin ping -h db --silent; do echo "mysql 起動待機中..."; sleep 2; done;'
+	./scripts/wait-for-containers.sh
 	docker-compose exec db bash -c "mysql -u root -p$(DB_PASSWORD) $(DB_DATABASE) < /dbBackup/db_before_migrate.sql"
 	docker-compose exec app composer install
 	docker-compose exec app php artisan migrate
