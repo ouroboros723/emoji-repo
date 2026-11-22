@@ -5,6 +5,6 @@ SHELL ["/bin/ash", "-oeux", "pipefail", "-c"]
 ENV TZ=UTC
 
 # nginx config file
-COPY ./infra/docker/nginx/*.conf /etc/nginx/conf.d/
+COPY ./infra/docker/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
 
 WORKDIR /work
