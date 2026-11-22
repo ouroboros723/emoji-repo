@@ -15,6 +15,18 @@ PHP 8.5・Composer・Node.js 24・pnpm は app コンテナに入っているた
 - `laravel-echo-server.json.sample` を `laravel-echo-server.json` という名前でコピーします。
 - `make init` コマンドを実行します。
 - http://localhost へアクセスします。
+# 本番環境のバージョン表示
+Docker Compose を使用する場合、nginx と PHP の追加設定ディレクトリはコンテナにマウントされます。
+本番環境だけで次のファイルを作成すると、nginx のバージョンと PHP の `X-Powered-By` が非表示になります（`Server: nginx` は残ります）。
+
+```sh
+cp infra/docker/nginx/conf.d/production.conf.example infra/docker/nginx/conf.d/production.conf
+cp infra/docker/php/conf.d/production.ini.example infra/docker/php/conf.d/production.ini
+```
+
+設定ファイルの変更後は、`docker compose restart app web` で反映できます。初めてこのマウント設定を導入する際は、先に `docker compose up -d --build app web` でコンテナを再作成してください。
+ホスト上で PHP を実行する staging 環境はコンテナの設定対象外です。
+
 # makeコマンド
 - `make init` docker-compose経由でセットアップを開始します。
 - `make reinit` .envの生成を除くセットアップ手順をdocker-compose経由で再実行します。

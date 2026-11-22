@@ -6,7 +6,6 @@
 /public/js
 /public/admin-css
 /public/admin-js
-/public/storage
 /public/mix-manifest.json
 /storage/*.key
 /vendor
@@ -33,3 +32,11 @@ pnpm-debug.log*
 # DBバックアップ（make migrate / make db-backup が出力。実データを含むためコミットしない）
 /infra/dbBackup/*
 !/infra/dbBackup/.gitkeep
+
+# 本番環境で有効化する設定
+/infra/docker/nginx/conf.d/production.conf
+/infra/docker/php/conf.d/production.ini
+
+# Agent session handovers
+handover.md
+.handover/
